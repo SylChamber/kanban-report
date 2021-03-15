@@ -15,7 +15,9 @@
     ],
     "author": "Sylvain Chamberland <gentx2@gmail.com>",
     "license": "ISC",
-    "dependencies": {},
+    "dependencies": {
+        "azure-devops-node-api": "^10.2.1"
+    },
     "devDependencies": {
         "eslint": "^7.22.0",
         "eslint-config-standard": "^16.0.2",
