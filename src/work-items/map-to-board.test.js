@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import mapToBoard from './map-to-board.mjs'
+import mapToBoard from './map-to-board.js'
 
 suite('work items', function () {
   suite('mapToBoard', function () {
