@@ -1,4 +1,4 @@
-import mapToPerson from './map-to-person.mjs'
+import mapToPerson from './map-to-person.js'
 import { assert } from 'chai'
 
 suite('teams', function () {
