@@ -5,12 +5,14 @@
         "node": true
     },
     "extends": [
-        "standard"
+        "standard",
+        "plugin:mocha/recommended"
     ],
     "parserOptions": {
         "ecmaVersion": 12,
         "sourceType": "module"
     },
+    "plugins": ["mocha"],
     "rules": {
     }
 }
