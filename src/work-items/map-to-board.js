@@ -18,6 +18,7 @@
  * @property {string} column - Column of the item on the board.
  * @property {boolean} [columnDone] - Subcolumn Done of the item on the board.
  * @property {string} [lane] - Lane of the item on the board.
+ * @property {number} [rank] - Rank of the item on the backlog and the board, represents the priority order.
  */
 
 /**
@@ -26,17 +27,34 @@
  * @returns {BoardLocation} The location of the item on the board.
  */
 export default function mapToBoard (item) {
-  const columnKey = 'System.BoardColumn'
-  const column = {
-    column: item.fields[columnKey]
-  }
-  let columnDone
-
-  if (item.fields[`${columnKey}Done`]) {
-    columnDone = {
-      columnDone: item.fields[`${columnKey}Done`]
-    }
+  const board = {
+    column: item.fields[fieldKeys.column]
   }
 
-  return Object.assign({}, column, columnDone)
+  if (item.fields[fieldKeys.columnDone] !== undefined) {
+    Object.assign(board, {
+      columnDone: item.fields[fieldKeys.columnDone]
+    })
+  }
+
+  if (item.fields[fieldKeys.lane]) {
+    Object.assign(board, {
+      lane: item.fields[fieldKeys.lane]
+    })
+  }
+
+  if (item.fields[fieldKeys.rank]) {
+    Object.assign(board, {
+      rank: item.fields[fieldKeys.rank]
+    })
+  }
+
+  return board
+}
+
+const fieldKeys = {
+  column: 'System.BoardColumn',
+  columnDone: 'System.BoardColumnDone',
+  lane: 'System.BoardLane',
+  rank: 'Microsoft.VSTS.Common.StackRank'
 }
