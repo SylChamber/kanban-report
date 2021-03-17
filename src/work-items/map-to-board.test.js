@@ -3,10 +3,6 @@ import mapToBoard from './map-to-board.js'
 
 suite('work items', function () {
   suite('mapToBoard', function () {
-    test('exists in module', function () {
-      assert.isFunction(mapToBoard)
-    })
-
     test('copies column', function () {
       const item = {
         fields: {
@@ -27,6 +23,7 @@ suite('work items', function () {
       const item = createBasicBoard()
       const board = mapToBoard(item)
       assert.isUndefined(board.columnDone)
+      assert.isFalse(Object.keys(board).includes('columnDone'))
     })
 
     function createBasicBoard () {
