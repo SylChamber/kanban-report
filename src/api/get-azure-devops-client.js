@@ -21,8 +21,21 @@ export default function getAzureDevopsClient (fetch) {
       throw new TypeError('The "project" property is not defined')
     }
 
-    if (options.team === undefined) {
-      throw new TypeError('The "team" property is not defined')
+    return {
+      async getTeamMembers (team) {
+        if (team === undefined || team === '') {
+          throw new ReferenceError('"team" is not defined')
+        }
+
+        const url = `https://dev.azure.com/${options.organization}/_apis/projects/${options.project}/teams/${team}/members`
+        const fetchOptions = {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+        const response = await fetch(url, fetchOptions)
+        return response
+      }
     }
   }
 }
@@ -46,7 +59,7 @@ export default function getAzureDevopsClient (fetch) {
 
 /**
  * @typedef {object} AzdevClient Client for the Azure DevOps REST API.
- * @property {function(string):TeamMembersResult} getTeamMembers Gets the members for the specified team.
+ * @property {function(string): Promise<TeamMembersResult>} getTeamMembers Gets the members for the specified team.
  */
 
 /**
