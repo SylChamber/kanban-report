@@ -16,9 +16,40 @@ suite('teams', function () {
       assert.isTrue(client.wasCalledWith(project, team))
     })
 
+    test('maps member identities to persons', async function () {
+      const expected = [
+        {
+          name: 'John Doe',
+          email: 'john.doe@example.com'
+        }
+      ]
+      const client = createApiClientStub()
+      client.setResponse({
+        value: [
+          {
+            identity: {
+              displayName: expected[0].name,
+              uniqueName: expected[0].email
+            }
+          }
+        ],
+        count: 1
+      })
+      const getMembers = getTeamMembers(client)
+      const options = {
+        project: 'Project',
+        team: 'Team'
+      }
+      const realMembers = await getMembers(options.project, options.team)
+      assert.deepEqual(realMembers, expected)
+    })
+
     function createApiClientStub () {
       const calls = []
-      const response = []
+      let response = {
+        value: [],
+        count: 0
+      }
 
       return {
         async getTeamMembersWithExtendedProperties (project, team) {
@@ -28,12 +59,12 @@ suite('teams', function () {
           })
 
           return new Promise((resolve, reject) => {
-            resolve([])
+            resolve(response)
           })
         },
 
         setResponse (data) {
-          response.push(...data)
+          response = data
         },
 
         wasCalledWith (project, team) {

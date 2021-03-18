@@ -1,3 +1,9 @@
+import mapToPerson from './map-to-person.js'
+
+/**
+ * @typedef {import('./map-to-person').Person} Person
+ */
+
 /**
  * Client for the Azure DevOps Core API.
  * @typedef {Object} CoreApi
@@ -11,8 +17,8 @@
  */
 function getTeamMembers (client) {
   return async function (project, team) {
-    const members = await client.getTeamMembersWithExtendedProperties(project, team)
-    return members
+    const result = await client.getTeamMembersWithExtendedProperties(project, team)
+    return result.value.map(member => mapToPerson(member.identity))
   }
 }
 
