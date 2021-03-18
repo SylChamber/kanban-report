@@ -26,16 +26,9 @@ suite('teams', function () {
         }
       ]
       const client = createApiClientStub()
-      client.setResponse({
-        value: [
-          {
-            identity: {
-              displayName: expected[0].name,
-              uniqueName: expected[0].email
-            }
-          }
-        ],
-        count: 1
+      client.addIdentity({
+        displayName: expected[0].name,
+        uniqueName: expected[0].email
       })
       const getMembers = getTeamMembers(client)
       const options = {
@@ -46,9 +39,24 @@ suite('teams', function () {
       assert.deepEqual(realMembers, expected)
     })
 
+    /**
+     * @typedef {import('./get-team-members').CoreApi} CoreApi
+     * @typedef {import('./map-to-person').Identity} Identity
+     * @typedef {import('./get-team-members').TeamMembersOptions} TeamMembersOptions
+     *
+     * @typedef {object} ClientStub
+     * @property {TeamMembersOptions[]} calls - Parameters of the calls to the stub.
+     * @property {function(Identity)} addIdentity - Adds an identity to the response.
+     * @property {function(string, string): boolean} wasCalledWith - Determines if a call was made to the stub with the specified arguments.
+     */
+
+    /**
+     * Creates a stub of the Azure DevOps Core API client.
+     * @returns {CoreApi & ClientStub} Stub of the Azure DevOps Core API client.
+     */
     function createApiClientStub () {
       const calls = []
-      let response = {
+      const response = {
         value: [],
         count: 0
       }
@@ -69,8 +77,9 @@ suite('teams', function () {
           })
         },
 
-        setResponse (data) {
-          response = data
+        addIdentity (identity) {
+          response.value.push({ identity: identity })
+          response.count++
         },
 
         wasCalledWith (project, team) {
