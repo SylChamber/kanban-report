@@ -35,7 +35,7 @@ suite('api', function () {
           name: 'undefined',
           api: undefined,
           errorType: ReferenceError,
-          errorMessage: '"azdev" is not defined'
+          errorMessage: '"webApi" is not defined'
         },
         {
           name: 'getCoreApi missing',
@@ -91,6 +91,34 @@ suite('api', function () {
           getWorkItemTrackingApi: function () {}
         }
       }
+
+      // eslint-disable-next-line mocha/no-skipped-tests
+      suite.skip('integration with Azure', function () {
+        let webClientOptions
+        let webApi
+
+        suiteSetup(function () {
+          webClientOptions = {
+            organization: process.env.AZURE_DEVOPS_ORG,
+            personalAccessToken: process.env.AZURE_DEVOPS_EXT_PAT
+          }
+          const tokenHandler = azdev.getPersonalAccessTokenHandler(webClientOptions.personalAccessToken)
+          const orgUrl = `https://dev.azure.com/${webClientOptions.organization}`
+          webApi = new azdev.WebApi(orgUrl, tokenHandler)
+        })
+        suite('getCoreApi', function () {
+          test('can get team members', async function () {
+            const teamOptions = {
+              project: process.env.AZURE_DEVOPS_PROJECT,
+              team: process.env.AZURE_DEVOPS_TEAM
+            }
+            const webClient = getWebClient(webApi)(webClientOptions)
+            const coreClient = await webClient.getCoreApi()
+            const members = await coreClient.getTeamMembersWithExtendedProperties(teamOptions)
+            assert.isNotEmpty(members)
+          })
+        })
+      })
     })
 
     // eslint-disable-next-line mocha/no-skipped-tests
@@ -106,25 +134,28 @@ suite('api', function () {
       })
 
       test('can get client for WorkItemTrackingApi', function () {
-        const webClient = new azdev.WebApi(orgUrl, tokenHandler)
-        const promise = webClient.getWorkItemTrackingApi()
+        const webApi = new azdev.WebApi(orgUrl, tokenHandler)
+        const promise = webApi.getWorkItemTrackingApi()
+        promise.then(function (witClient) {
+          console.log(Object.keys(witClient))
+        })
         return assert.isFulfilled(promise)
       })
 
       test('can get client for CoreApi', function () {
-        const webClient = new azdev.WebApi(orgUrl, tokenHandler)
-        const promise = webClient.getCoreApi()
+        const webApi = new azdev.WebApi(orgUrl, tokenHandler)
+        const promise = webApi.getCoreApi()
         return assert.isFulfilled(promise)
       })
 
       test('can get team members', async function () {
-        const webClient = new azdev.WebApi(orgUrl, tokenHandler)
-        const coreClient = await webClient.getCoreApi()
+        const webApi = new azdev.WebApi(orgUrl, tokenHandler)
+        const coreApi = await webApi.getCoreApi()
         const project = process.env.AZURE_DEVOPS_PROJECT
         const team = process.env.AZURE_DEVOPS_TEAM
-        const promise = coreClient.getTeamMembersWithExtendedProperties(project, team)
-        assert.isFulfilled(promise)
-        return assert.eventually.isNotEmpty(promise)
+        const response = await coreApi.getTeamMembersWithExtendedProperties(project, team)
+        console.log('getTeamMembers* response:', response)
+        assert.isNotEmpty(response)
       })
     })
   })
