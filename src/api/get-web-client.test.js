@@ -13,14 +13,84 @@ suite('api', function () {
       assert.isFunction(getWebClient)
     })
 
-    test('requires an organization', function () {
-      const promise = getWebClient({ personalAccessToken: 'token' })
-      return assert.isRejected(promise)
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    createWebApiSamples().forEach(function (sample) {
+      test(`requires the azdev API (${sample.name})`, function () {
+        const fn = () => getWebClient(sample.api)
+        assert.throws(fn, sample.errorType, sample.errorMessage)
+      })
     })
 
-    test('requires a personal access token', function () {
-      const promise = getWebClient({ organization: 'Org' })
-      return assert.isRejected(promise)
+    test('returns a function that gets the web client', function () {
+      const getWebClientfn = getWebClient({
+        getCoreApi: function () {},
+        getWorkItemTrackingApi: function () {}
+      })
+      assert.isFunction(getWebClientfn)
+    })
+
+    function createWebApiSamples () {
+      return [
+        {
+          name: 'undefined',
+          api: undefined,
+          errorType: ReferenceError,
+          errorMessage: '"azdev" is not defined'
+        },
+        {
+          name: 'getCoreApi missing',
+          api: { async getWorkItemTrackingApi () {} },
+          errorType: TypeError,
+          errorMessage: 'The "getCoreApi" property is undefined'
+        },
+        {
+          name: 'getWorkItemTrackingApi missing',
+          api: { async getCoreApi () {} },
+          errorType: TypeError,
+          errorMessage: 'The "getWorkItemTrackingApi" property is undefined'
+        }
+      ]
+    }
+
+    suite('returned function', function () {
+      test('requires an organization', function () {
+        const fn = () => getWebClient(createAzdevApiStub())({ personalAccessToken: 'token' })
+        assert.throws(fn, TypeError, 'The "organization" property is undefined')
+      })
+
+      test('requires a personal access token', function () {
+        const fn = () => getWebClient(createAzdevApiStub())({ organization: 'Org' })
+        assert.throws(fn, TypeError, 'The "personalAccessToken" property is undefined')
+      })
+
+      test('returns a client that allows access to Azure DevOps APIs', function () {
+        const options = { organization: 'org', personalAccessToken: 'token' }
+        const client = getWebClient(createAzdevApiStub())(options)
+        assert.isDefined(client)
+        assertExposesCoreApi(client)
+        assertExposesWorkItemTrackingApi(client)
+
+        function assertExposesCoreApi (webClient) {
+          assertExposesApi(webClient, 'getCoreApi')
+        }
+
+        function assertExposesWorkItemTrackingApi (webClient) {
+          assertExposesApi(webClient, 'getWorkItemTrackingApi')
+        }
+
+        function assertExposesApi (webClient, apiFunctionName) {
+          assert.property(webClient, apiFunctionName)
+          assert.isDefined(webClient[apiFunctionName])
+          assert.isFunction(webClient[apiFunctionName])
+        }
+      })
+
+      function createAzdevApiStub () {
+        return {
+          getCoreApi: function () {},
+          getWorkItemTrackingApi: function () {}
+        }
+      }
     })
 
     // eslint-disable-next-line mocha/no-skipped-tests
