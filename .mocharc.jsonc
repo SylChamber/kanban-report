@@ -6,6 +6,7 @@
     "mjs"
   ],
   "package": "./package.json",
+  "parallel": true,
   "reporter": "spec",
   "slow": 75,
   "spec": [

@@ -2,6 +2,7 @@ import chai, { assert } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import * as azdev from 'azure-devops-node-api'
 import getWebClient from './get-web-client.js'
+import fetch from 'node-fetch'
 
 suite('api', function () {
   suiteSetup(function () {
@@ -155,6 +156,25 @@ suite('api', function () {
         const team = process.env.AZURE_DEVOPS_TEAM
         const response = await coreApi.getTeamMembersWithExtendedProperties(project, team)
         console.log('getTeamMembers* response:', response)
+        assert.isNotEmpty(response)
+      })
+
+      test('get team members by REST API', async function () {
+        const org = process.env.AZURE_DEVOPS_ORG
+        const proj = process.env.AZURE_DEVOPS_PROJECT
+        const team = process.env.AZURE_DEVOPS_TEAM
+        const url = `https://dev.azure.com/${org}/_apis/projects/${proj}/teams/${team}/members`
+        const b64Token = Buffer
+          .from(`:${process.env.AZURE_DEVOPS_EXT_PAT}`)
+          .toString('base64')
+        const headers = {
+          Authorization: `Basic ${b64Token}`,
+          'Content-Type': 'application/json'
+        }
+        const response = await fetch(url, { headers })
+        const result = await response.json()
+        console.log(`team members REST API response: ${response.status} (${response.statusText})\n`,
+          result)
         assert.isNotEmpty(response)
       })
     })
