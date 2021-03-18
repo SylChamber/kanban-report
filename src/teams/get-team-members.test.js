@@ -23,14 +23,14 @@ suite('teams', function () {
       assert.isTrue(client.wasCalledWith(options.project, options.team))
     })
 
-    test('throws when project undefined', function () {
+    test('requires project', function () {
       const client = createApiClientStub()
       const getMembers = getTeamMembers(client)
       const promise = getMembers({ team: 'Team' })
       return assert.isRejected(promise)
     })
 
-    test('throws when team undefined', function () {
+    test('requires team', function () {
       const client = createApiClientStub()
       const getMembers = getTeamMembers(client)
       const promise = getMembers({ project: 'Project' })
@@ -75,10 +75,7 @@ suite('teams', function () {
      */
     function createApiClientStub () {
       const calls = []
-      const response = {
-        value: [],
-        count: 0
-      }
+      const response = []
 
       return {
         calls () {
@@ -97,8 +94,7 @@ suite('teams', function () {
         },
 
         addIdentity (identity) {
-          response.value.push({ identity: identity })
-          response.count++
+          response.push({ identity: identity })
         },
 
         wasCalledWith (project, team) {

@@ -54,8 +54,8 @@ function getTeamMembers (client) {
       throw new Error('The team parameter is required.')
     }
 
-    const result = await client.getTeamMembersWithExtendedProperties(project, team)
-    return result.value.map(member => mapToPerson(member.identity))
+    const members = await client.getTeamMembersWithExtendedProperties(project, team)
+    return members.map(member => mapToPerson(member.identity))
   }
 }
 
