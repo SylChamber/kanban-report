@@ -10,10 +10,12 @@ suite('teams', function () {
     test('calls API client', async function () {
       const client = createApiClientStub()
       const getMembers = getTeamMembers(client)
-      const project = 'Project'
-      const team = 'Team'
-      await getMembers(project, team)
-      assert.isTrue(client.wasCalledWith(project, team))
+      const options = {
+        project: 'Project',
+        team: 'Team'
+      }
+      await getMembers(options)
+      assert.isTrue(client.wasCalledWith(options.project, options.team))
     })
 
     test('maps member identities to persons', async function () {
@@ -40,7 +42,7 @@ suite('teams', function () {
         project: 'Project',
         team: 'Team'
       }
-      const realMembers = await getMembers(options.project, options.team)
+      const realMembers = await getMembers(options)
       assert.deepEqual(realMembers, expected)
     })
 
@@ -52,6 +54,10 @@ suite('teams', function () {
       }
 
       return {
+        calls () {
+          return calls
+        },
+
         async getTeamMembersWithExtendedProperties (project, team) {
           calls.push({
             project: project,
