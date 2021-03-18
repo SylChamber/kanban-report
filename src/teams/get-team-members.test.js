@@ -62,7 +62,9 @@ suite('teams', function () {
      * @typedef {import('./get-team-members').CoreApi} CoreApi
      * @typedef {import('./map-to-person').Identity} Identity
      * @typedef {import('./get-team-members').TeamMembersOptions} TeamMembersOptions
-     *
+     */
+
+    /**
      * @typedef {object} ClientStub
      * @property {TeamMembersOptions[]} calls - Parameters of the calls to the stub.
      * @property {function(Identity)} addIdentity - Adds an identity to the response.
