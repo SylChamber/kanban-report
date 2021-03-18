@@ -16,7 +16,8 @@
     "author": "Sylvain Chamberland <gentx2@gmail.com>",
     "license": "ISC",
     "dependencies": {
-        "azure-devops-node-api": "^10.2.1"
+        "azure-devops-node-api": "^10.2.1",
+        "date-fns": "^2.19.0"
     },
     "devDependencies": {
         "chai": "^4.3.4",
