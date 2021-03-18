@@ -1,7 +1,12 @@
-import { assert } from 'chai'
+import chai, { assert } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
 import { getTeamMembers } from './get-team-members.js'
 
 suite('teams', function () {
+  suiteSetup(function () {
+    chai.use(chaiAsPromised)
+  })
+
   suite('getTeamMembers', function () {
     test('function exists', function () {
       assert.isFunction(getTeamMembers)
@@ -16,6 +21,20 @@ suite('teams', function () {
       }
       await getMembers(options)
       assert.isTrue(client.wasCalledWith(options.project, options.team))
+    })
+
+    test('throws when project undefined', function () {
+      const client = createApiClientStub()
+      const getMembers = getTeamMembers(client)
+      const promise = getMembers({ team: 'Team' })
+      return assert.isRejected(promise)
+    })
+
+    test('throws when team undefined', function () {
+      const client = createApiClientStub()
+      const getMembers = getTeamMembers(client)
+      const promise = getMembers({ project: 'Project' })
+      return assert.isRejected(promise)
     })
 
     test('maps member identities to persons', async function () {

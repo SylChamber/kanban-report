@@ -46,6 +46,14 @@ import mapToPerson from './map-to-person.js'
  */
 function getTeamMembers (client) {
   return async function ({ project, team }) {
+    if (project === undefined || project === '') {
+      throw new Error('The project parameter is required.')
+    }
+
+    if (team === undefined || team === '') {
+      throw new Error('The team parameter is required.')
+    }
+
     const result = await client.getTeamMembersWithExtendedProperties(project, team)
     return result.value.map(member => mapToPerson(member.identity))
   }
