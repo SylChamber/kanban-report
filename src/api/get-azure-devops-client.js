@@ -1,14 +1,26 @@
+import mapToPerson from '../teams/map-to-person.js'
+
 /**
  * Gets a function that gets a client for the Azure DevOps REST API.
  * @param {function(RequestInfo, [RequestInit]): Promise<Response>} fetch Interface that fetches resources from the network.
  * @returns {GetAzureDevopsClient} A function that gets a client that permits access to Azure DevOps data.
+ * @throws {ReferenceError} "fetch" is not defined
  */
 export default function getAzureDevopsClient (fetch) {
+  // fetch is injected because it makes it simpler to mock in tests without a mocking framework.
   if (fetch === undefined) {
     throw new ReferenceError('"fetch" is not defined')
   }
 
-  return function (options) {
+  /**
+   * Gets a client for the Azure DevOps REST API.
+   * @param {AzdevClientOptions} options Options for getting an Azure DevOps REST API client.
+   * @returns {AzdevClient} Client for the Azure DevOps REST API.
+   * @throws {ReferenceError} "options" is not defined
+   * @throws {TypeError} The "organization" property is not defined
+   * @throws {TypeError} The "project" property is not defined
+   */
+  const getClient = function (options) {
     if (options === undefined) {
       throw new ReferenceError('"options" is not defined')
     }
@@ -22,6 +34,12 @@ export default function getAzureDevopsClient (fetch) {
     }
 
     return {
+      /**
+       * Gets the members for the specified team
+       * @param {string} team Team for which the members are required
+       * @returns {Promise<TeamMembersResult>} Promise of a result of a query for team members.
+       * @throws {ReferenceError} "team" is not defined
+       */
       async getTeamMembers (team) {
         if (team === undefined || team === '') {
           throw new ReferenceError('"team" is not defined')
@@ -34,10 +52,12 @@ export default function getAzureDevopsClient (fetch) {
           }
         }
         const response = await fetch(url, fetchOptions)
-        return response
+        return response.json().value.map(mapToPerson)
       }
     }
   }
+
+  return getClient
 }
 
 /**

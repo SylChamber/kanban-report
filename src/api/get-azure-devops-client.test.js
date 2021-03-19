@@ -1,6 +1,6 @@
 import chai, { assert } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import fetch from 'node-fetch'
+import sortBy from 'lodash/fp/sortBy.js'
 import getAzureDevopsClient from './get-azure-devops-client.js'
 
 suite('api', function () {
@@ -37,7 +37,7 @@ suite('api', function () {
         assert.throws(fn, TypeError, 'The "project" property is not defined')
       })
 
-      suite('result object', function () {
+      suite('Azure DevOps client', function () {
         suite('getTeamMembers', function () {
           test('requires team', function () {
             const client = createClient(createFetchStub().fetch)
@@ -57,10 +57,35 @@ suite('api', function () {
                 }
               }
             }
-            fetchStub.setExpected(expected)
+            fetchStub.setExpectedCall(expected)
             await client.getTeamMembers(team)
             const fetchWasCalled = fetchStub.wasCalledWith(expected.url, expected.options)
             assert.isTrue(fetchWasCalled, fetchStub.getErrorMessage())
+          })
+
+          test('returns members mapped to persons', async function () {
+            const sortByName = sortBy('name')
+            const fetchStub = createFetchStub()
+            const client = createClient(fetchStub.fetch)
+            const team = 'teamd'
+            const returnedData = {
+              value: [
+                { displayName: 'John Doe', uniqueName: 'john.doe@example.com' },
+                { displayName: 'Sam Adams', uniqueName: 'sam.adams@samadams.com' }
+              ],
+              count: 2
+            }
+            const expected = [
+              { name: 'John Doe', email: 'john.doe@example.com' },
+              { name: 'Sam Adams', email: 'sam.adams@samadams.com' }
+            ]
+            fetchStub.setReturnedData(returnedData)
+            const result = await client.getTeamMembers(team)
+            assert.isArray(result, `expected an array of persons but got:\n${JSON.stringify(result)}\n\n`)
+            const sortedResult = sortByName(result)
+            sortByName(expected).forEach((person, index) => {
+              assert.deepEqual(sortedResult[index], person)
+            })
           })
         })
 
@@ -69,7 +94,13 @@ suite('api', function () {
         }
 
         function createFetchStub () {
-          let res = {}
+          const response = {
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            json () { return returnedData }
+          }
+          let returnedData = { value: [], count: 0 }
           const calls = []
           let expectedCall = {}
 
@@ -85,7 +116,7 @@ suite('api', function () {
               })
 
               return new Promise((resolve, reject) => {
-                resolve(res)
+                resolve(response)
               })
             },
 
@@ -106,12 +137,16 @@ actual calls:  ${calls.length === 0 ? 'none' : ''}
   `
             },
 
-            setExpected (expected) {
-              expectedCall = expected
+            setExpectedCall (call) {
+              expectedCall = call
             },
 
-            setResponse (response) {
-              res = response
+            setReturnedData (data) {
+              returnedData = data
+            },
+
+            setReturnedState (state) {
+              Object.assign(response, state)
             },
 
             wasCalledWith (url, options) {
