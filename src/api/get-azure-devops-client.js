@@ -52,7 +52,8 @@ export default function getAzureDevopsClient (fetch) {
           }
         }
         const response = await fetch(url, fetchOptions)
-        return response.json().value.map(mapToPerson)
+        const result = await response.json()
+        return result.value.map(mapToPerson)
       }
     }
   }

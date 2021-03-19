@@ -98,7 +98,7 @@ suite('api', function () {
             ok: true,
             status: 200,
             statusText: 'OK',
-            json () { return returnedData }
+            async json () { return new Promise(resolve => resolve(returnedData)) }
           }
           let returnedData = { value: [], count: 0 }
           const calls = []
