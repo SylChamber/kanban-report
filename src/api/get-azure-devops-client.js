@@ -1,3 +1,5 @@
+// using base-64 package so it works both in Node.js and browsers
+import base64 from 'base-64/base64.js'
 import mapToPerson from '../teams/map-to-person.js'
 
 /**
@@ -19,6 +21,7 @@ export default function getAzureDevopsClient (fetch) {
    * @throws {ReferenceError} "options" is not defined
    * @throws {TypeError} The "organization" property is not defined
    * @throws {TypeError} The "project" property is not defined
+   * @throws {TypeError} The "personalAccessToken" property is not defined
    */
   const getClient = function (options) {
     if (options === undefined) {
@@ -33,11 +36,15 @@ export default function getAzureDevopsClient (fetch) {
       throw new TypeError('The "project" property is not defined')
     }
 
+    if (options.personalAccessToken === undefined) {
+      throw new TypeError('The "personalAccessToken" property is not defined')
+    }
+
     return {
       /**
        * Gets the members for the specified team
        * @param {string} team Team for which the members are required
-       * @returns {Promise<TeamMembersResult>} Promise of a result of a query for team members.
+       * @returns {Promise<Person[]>} Promise of a result of a query for team members.
        * @throws {ReferenceError} "team" is not defined
        */
       async getTeamMembers (team) {
@@ -48,12 +55,15 @@ export default function getAzureDevopsClient (fetch) {
         const url = `https://dev.azure.com/${options.organization}/_apis/projects/${options.project}/teams/${team}/members`
         const fetchOptions = {
           headers: {
+            Authorization: `Basic ${base64.encode(`:${options.personalAccessToken}`)}`,
             'Content-Type': 'application/json'
           }
         }
+        const mapMemberToPerson = member => mapToPerson(member.identity)
         const response = await fetch(url, fetchOptions)
         const result = await response.json()
-        return result.value.map(mapToPerson)
+        const persons = result.value.filter(member => !member.identity.isContainer)
+        return persons.map(mapMemberToPerson)
       }
     }
   }
@@ -65,12 +75,14 @@ export default function getAzureDevopsClient (fetch) {
  * @typedef {import('node-fetch').RequestInfo} RequestInfo
  * @typedef {import('node-fetch').RequestInit} RequestInit
  * @typedef {import('node-fetch').Response} Response
+ * @typedef {import('../teams/map-to-person').Person} Person
  */
 
 /**
  * @typedef {object} AzdevClientOptions Options for getting an Azure DevOps REST API client.
  * @property {string} organization - Organization that hosts the data in Azure DevOps.
  * @property {string} project - Project the team is part of.
+ * @property {string} personalAccessToken - Personal access token that allows access to Azure DevOps.
  */
 
 /**
@@ -80,7 +92,7 @@ export default function getAzureDevopsClient (fetch) {
 
 /**
  * @typedef {object} AzdevClient Client for the Azure DevOps REST API.
- * @property {function(string): Promise<TeamMembersResult>} getTeamMembers Gets the members for the specified team.
+ * @property {function(string): Promise<Person[]>} getTeamMembers Gets the members for the specified team.
  */
 
 /**

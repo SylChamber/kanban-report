@@ -17,6 +17,7 @@
     "license": "ISC",
     "dependencies": {
         "azure-devops-node-api": "^10.2.1",
+        "base-64": "^1.0.0",
         "date-fns": "^2.19.0",
         "node-fetch": "^2.6.1"
     },
