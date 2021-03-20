@@ -10,8 +10,7 @@
   "reporter": "spec",
   "slow": 75,
   "spec": [
-    "**/*.test.mjs",
-    "**/*.test.js"
+    "src/**/*.test.js"
   ],
   "timeout": "5000",
   "ui": "tdd",

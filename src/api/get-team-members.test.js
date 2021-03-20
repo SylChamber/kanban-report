@@ -1,8 +1,12 @@
-import { assert } from 'chai'
+import chai, { assert } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
 import sortBy from 'lodash/fp/sortBy.js'
 import createTeamMembersGetter from './get-team-members.js'
 
 suite('api', function () {
+  suiteSetup(function () {
+    chai.use(chaiAsPromised)
+  })
   suite('createTeamMembersGetter', function () {
     test('requires options', function () {
       const fn = () => createTeamMembersGetter(undefined, {})
