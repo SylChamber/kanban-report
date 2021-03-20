@@ -3,12 +3,16 @@ import base64 from 'base-64'
 import mapToPerson from '../teams/map-to-person.js'
 
 /**
- * Gets a function that gets the members for the specified team.
+ * @module api/createTeamMembersGetter
+ */
+
+/**
+ * Creates a function that gets the members for the specified team.
  * @param {AzdevClientOptions} options Options for getting an Azure DevOps REST API client.
  * @param {fetch} fetch Interface that fetches resources from the network.
  * @returns {getTeamMembers} Function that gets the members for the specified team.
  */
-export default function (options, fetch) {
+export default function createTeamMembersGetter (options, fetch) {
   if (options === undefined) {
     throw new ReferenceError('"options" is not defined')
   }
@@ -51,6 +55,10 @@ export default function (options, fetch) {
     }
     const mapMemberToPerson = member => mapToPerson(member.identity)
     const response = await fetch(url, fetchOptions)
+
+    /**
+     * @type {TeamMembersResult}
+     */
     const result = await response.json()
     const persons = result.value.filter(member => !member.identity.isContainer)
     return persons.map(mapMemberToPerson)
@@ -59,8 +67,8 @@ export default function (options, fetch) {
 
 /**
  * @typedef {import('../teams/map-to-person').Person} Person
- * @typedef {import('./get-azure-devops-client').AzdevClientOptions} AzdevClientOptions
- * @typedef {import('./get-azure-devops-client').fetch} fetch
+ * @typedef {import('./create-azure-devops-client').AzureDevopsClientOptions} AzdevClientOptions
+ * @typedef {import('./create-azure-devops-client').fetch} fetch
  * @typedef {import('node-fetch').RequestInfo} RequestInfo
  * @typedef {import('node-fetch').RequestInit} RequestInit
  * @typedef {import('node-fetch').Response} Response

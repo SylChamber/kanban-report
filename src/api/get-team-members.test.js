@@ -1,41 +1,41 @@
 import { assert } from 'chai'
 import sortBy from 'lodash/fp/sortBy.js'
-import getTeamMembersGetter from './get-team-members.js'
+import createTeamMembersGetter from './get-team-members.js'
 
 suite('api', function () {
-  suite('getTeamMembers getter', function () {
+  suite('createTeamMembersGetter', function () {
     test('requires options', function () {
-      const fn = () => getTeamMembersGetter(undefined, {})
+      const fn = () => createTeamMembersGetter(undefined, {})
       assert.throws(fn, ReferenceError, '"options" is not defined')
     })
 
     test('requires options.organization', function () {
       const options = { personalAccessToken: 'token', project: 'proj' }
-      const fn = () => getTeamMembersGetter(options, {})
+      const fn = () => createTeamMembersGetter(options, {})
       assert.throws(fn, TypeError, 'The "options.organization" property is not defined')
     })
 
     test('requires options.project', function () {
       const options = { organization: 'org', personalAccessToken: 'token' }
-      const fn = () => getTeamMembersGetter(options, {})
+      const fn = () => createTeamMembersGetter(options, {})
       assert.throws(fn, TypeError, 'The "options.project" property is not defined')
     })
 
     test('requires options.personalAccessToken', function () {
       const options = { organization: 'org', project: 'proj' }
-      const fn = () => getTeamMembersGetter(options, {})
+      const fn = () => createTeamMembersGetter(options, {})
       assert.throws(fn, TypeError, 'The "options.personalAccessToken" property is not defined')
     })
 
     test('requires fetch', function () {
       const options = { organization: 'org', personalAccessToken: 'token', project: 'proj' }
-      const fn = () => getTeamMembersGetter(options)
+      const fn = () => createTeamMembersGetter(options)
       assert.throws(fn, ReferenceError, '"fetch" is not defined')
     })
 
     test('returns a function', function () {
       const options = { organization: 'org', personalAccessToken: 'token', project: 'proj' }
-      const fn = getTeamMembersGetter(options, {})
+      const fn = createTeamMembersGetter(options, {})
       assert.isFunction(fn)
     })
   })
@@ -43,7 +43,7 @@ suite('api', function () {
   suite('getTeamMembers', function () {
     test('requires team', function () {
       const fetch = createFetchStub().fetch
-      const getTeamMembers = getTeamMembersGetter(options, fetch)
+      const getTeamMembers = createTeamMembersGetter(options, fetch)
       const promise = getTeamMembers()
       return assert.isRejected(promise, ReferenceError, '"team" is not defined')
     })
@@ -61,7 +61,7 @@ suite('api', function () {
         }
       }
       fetchStub.setExpectedCall(expected)
-      const getTeamMembers = getTeamMembersGetter(options, fetchStub.fetch)
+      const getTeamMembers = createTeamMembersGetter(options, fetchStub.fetch)
       await getTeamMembers(team)
       const fetchWasCalled = fetchStub.wasCalledWith(expected.url, expected.options)
       assert.isTrue(fetchWasCalled, fetchStub.getErrorMessage())
@@ -83,7 +83,7 @@ suite('api', function () {
         { name: 'Sam Adams', email: 'sam.adams@samadams.com' }
       ]
       fetchStub.setReturnedData(returnedData)
-      const getTeamMembers = getTeamMembersGetter(options, fetchStub.fetch)
+      const getTeamMembers = createTeamMembersGetter(options, fetchStub.fetch)
       const result = await getTeamMembers(team)
       assert.isArray(result, `expected an array of persons but got:\n${JSON.stringify(result)}\n\n`)
       const sortedResult = sortByName(result)
@@ -112,7 +112,7 @@ suite('api', function () {
       }
       const expected = [{ name: 'John Doe', email: 'john.doe@example.com' }]
       fetchStub.setReturnedData(returnedData)
-      const getTeamMembers = getTeamMembersGetter(options, fetchStub.fetch)
+      const getTeamMembers = createTeamMembersGetter(options, fetchStub.fetch)
       const result = await getTeamMembers(team)
       assert.strictEqual(
         result.length,
