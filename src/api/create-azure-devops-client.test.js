@@ -46,6 +46,17 @@ suite('api', function () {
   })
 
   suite('AzureDevopsClient', function () {
+    test('exposes getTeamMembers', function () {
+      const options = {
+        organization: process.env.AZURE_DEVOPS_ORG,
+        project: process.env.AZURE_DEVOPS_PROJECT,
+        personalAccessToken: process.env.AZURE_DEVOPS_EXT_PAT
+      }
+      const client = createAzureDevopsClientFactory(function () {})(options)
+      assert.property(client, 'getTeamMembers')
+      assert.isFunction(client.getTeamMembers)
+    })
+
     // eslint-disable-next-line mocha/no-skipped-tests
     suite.skip('integration with Azure', function () {
       test('client can access Azure DevOps', async function () {
