@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "type": "module",
     "description": "Supplies methods for generating a report on Kanban activity in Azure DevOps.",
-    "main": "index.mjs",
+    "main": "index.js",
     "scripts": {
         "test": "mocha"
     },
