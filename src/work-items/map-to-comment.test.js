@@ -1,26 +1,23 @@
-import { assert } from 'chai'
-import mapToComment from './map-to-comment.js'
+const mapToComment = require('./map-to-comment')
 
-suite('work items', function () {
-  suite('mapToComment', function () {
-    // eslint-disable-next-line mocha/no-setup-in-describe
-
+describe('work items', function () {
+  describe('mapToComment', function () {
     test('copies id', function () {
       const workItemComment = createBasicWorkItemComment()
       const realComment = mapToComment(workItemComment)
-      assert.strictEqual(realComment.id, workItemComment.id)
+      expect(realComment.id).toEqual(workItemComment.id)
     })
 
     test('copies work item id', function () {
       const workItemComment = createBasicWorkItemComment()
       const realComment = mapToComment(workItemComment)
-      assert.strictEqual(realComment.workItemId, workItemComment.workItemId)
+      expect(realComment.workItemId).toEqual(workItemComment.workItemId)
     })
 
     test('copies text', function () {
       const workItemComment = createBasicWorkItemComment()
       const realComment = mapToComment(workItemComment)
-      assert.strictEqual(realComment.text, workItemComment.text)
+      expect(realComment.text).toEqual(workItemComment.text)
     })
 
     test('copies created date', function () {
@@ -32,7 +29,7 @@ suite('work items', function () {
           createdDate: createdDate
         })
       const realComment = mapToComment(workItemComment)
-      assert.strictEqual(realComment.createdDate.valueOf(), expectedDate.valueOf())
+      expect(realComment.createdDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
     test('copies created by', function () {
@@ -49,7 +46,7 @@ suite('work items', function () {
           }
         })
       const realComment = mapToComment(workItemComment)
-      assert.deepEqual(realComment.createdBy, expectedCreatedBy)
+      expect(realComment.createdBy).toEqual(expectedCreatedBy)
     })
 
     test('copies modified date', function () {
@@ -61,13 +58,7 @@ suite('work items', function () {
           modifiedDate: modifiedDate
         })
       const realComment = mapToComment(workItemComment)
-      assert.strictEqual(realComment.modifiedDate.valueOf(), expectedDate.valueOf())
-    })
-
-    test('ignores modified date if absent', function () {
-      const workItemComment = createBasicWorkItemComment()
-      const realComment = mapToComment(workItemComment)
-      assert.isFalse(Object.keys(realComment).includes('modifiedDate'))
+      expect(realComment.modifiedDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
     test('copies modified by', function () {
@@ -85,26 +76,31 @@ suite('work items', function () {
         }
       )
       const realComment = mapToComment(workItemComment)
-      assert.deepEqual(realComment.modifiedBy, expectedModifiedBy)
+      expect(realComment.modifiedBy).toEqual(expectedModifiedBy)
+    })
+
+    test('ignores modified date if absent', function () {
+      const workItemComment = createBasicWorkItemComment()
+      const realComment = mapToComment(workItemComment)
+      expect(realComment).not.toHaveProperty('modifiedDate')
     })
 
     test('ignores modified by if absent', function () {
       const workItemComment = createBasicWorkItemComment()
       const realComment = mapToComment(workItemComment)
-      assert.isUndefined(realComment.modifiedBy)
-      assert.isFalse(Object.keys(realComment).includes('modifiedBy'))
+      expect(realComment).not.toHaveProperty('modifiedBy')
     })
 
     test('copies url', function () {
       const workItemComment = createBasicWorkItemComment()
       const realComment = mapToComment(workItemComment)
-      assert.strictEqual(realComment.url, workItemComment.url)
+      expect(realComment.url).toEqual(workItemComment.url)
     })
 
     test('copies version number', function () {
       const workItemComment = createBasicWorkItemComment()
       const realComment = mapToComment(workItemComment)
-      assert.strictEqual(realComment.version, workItemComment.version)
+      expect(realComment.version).toEqual(workItemComment.version)
     })
 
     function createBasicWorkItemComment () {

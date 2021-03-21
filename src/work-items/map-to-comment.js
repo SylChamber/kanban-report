@@ -1,4 +1,4 @@
-import mapToPerson from '../teams/map-to-person.js'
+const mapToPerson = require('../teams/map-to-person')
 
 /**
  * @typedef {import("../teams/map-to-person").Person} Person
@@ -23,7 +23,7 @@ import mapToPerson from '../teams/map-to-person.js'
  * @param workItemComment - Work item comment in Azure DevOps.
  * @returns {Comment} An object that represents the work item comment.
  */
-export default function mapToComment (workItemComment) {
+function mapToComment (workItemComment) {
   const comment = {
     id: workItemComment.id,
     workItemId: workItemComment.workItemId,
@@ -48,3 +48,5 @@ export default function mapToComment (workItemComment) {
 
   return comment
 }
+
+module.exports = mapToComment
