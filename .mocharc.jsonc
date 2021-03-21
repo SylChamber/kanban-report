@@ -15,8 +15,7 @@
   "timeout": "5000",
   "ui": "tdd",
   "watch-files": [
-    "**/*.[m]js",
-    "**/*.test.[m]js"
+    "**/*.js"
   ],
   "watch-ignore": []
 }
