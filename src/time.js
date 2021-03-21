@@ -1,4 +1,4 @@
-import subBusinessDays from 'date-fns/fp/subBusinessDays/index.js'
+const subBusinessDays = require('date-fns/fp/subBusinessDays')
 
 /**
  * Gets the work day preceding the date of reference.
@@ -9,4 +9,4 @@ function getPreviousWorkday (referenceDate) {
   return subBusinessDays(1)(referenceDate)
 }
 
-export { getPreviousWorkday }
+module.exports = getPreviousWorkday
