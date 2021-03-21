@@ -1,5 +1,5 @@
-import mapToBoard from './map-to-board.js'
-import mapToPerson from '../teams/map-to-person.js'
+const mapToBoard = require('./map-to-board')
+const mapToPerson = require('../teams/map-to-person')
 
 /**
  * @typedef {import('../teams/map-to-person').Person} Person
@@ -41,7 +41,7 @@ import mapToPerson from '../teams/map-to-person.js'
  * @param {any} item - Work item from Azure DevOps to map to a user story.
  * @returns {UserStory} An object that represents the user story in Azure DevOps.
  */
-export default function mapToUserStory (item) {
+function mapToUserStory (item) {
   const story = {
     id: item.id,
     acceptanceCriteria: item.fields[fieldKeys.acceptanceCriteria],
@@ -140,3 +140,5 @@ const fieldKeys = {
   title: 'System.Title',
   workItemType: 'System.WorkItemType'
 }
+
+module.exports = mapToUserStory

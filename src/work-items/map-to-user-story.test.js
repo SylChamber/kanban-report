@@ -1,12 +1,11 @@
-import { assert } from 'chai'
-import mapToUserStory from './map-to-user-story.js'
+const mapToUserStory = require('./map-to-user-story')
 
 /**
  * @typedef {import('../teams/map-to-person').Person} Person
  */
 
-suite('work items', function () {
-  suite('mapToUserStory', function () {
+describe('work items', function () {
+  describe('mapToUserStory', function () {
     const fieldKeys = {
       acceptanceCriteria: 'Microsoft.VSTS.Common.AcceptanceCriteria',
       activatedBy: 'Microsoft.VSTS.Common.ActivatedBy',
@@ -39,25 +38,25 @@ suite('work items', function () {
     test('copies id', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.id, workItem.id)
+      expect(realStory.id).toEqual(workItem.id)
     })
 
     test('copies work item type', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.workItemType, workItem.fields[fieldKeys.workItemType])
+      expect(realStory.workItemType).toEqual(workItem.fields[fieldKeys.workItemType])
     })
 
     test('copies title', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.title, workItem.fields[fieldKeys.title])
+      expect(realStory.title).toEqual(workItem.fields[fieldKeys.title])
     })
 
     test('copies area path', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.areaPath, workItem.fields[fieldKeys.areaPath])
+      expect(realStory.areaPath).toEqual(workItem.fields[fieldKeys.areaPath])
     })
 
     test('copies state', function () {
@@ -66,7 +65,7 @@ suite('work items', function () {
         [fieldKeys.state]: 'Active'
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.state, workItem.fields[fieldKeys.state])
+      expect(realStory.state).toEqual(workItem.fields[fieldKeys.state])
     })
 
     test('copies state reason', function () {
@@ -75,7 +74,7 @@ suite('work items', function () {
         [fieldKeys.stateReason]: 'Implementation started'
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.stateReason, workItem.fields[fieldKeys.stateReason])
+      expect(realStory.stateReason).toEqual(workItem.fields[fieldKeys.stateReason])
     })
 
     test('copies state change date', function () {
@@ -86,7 +85,7 @@ suite('work items', function () {
         [fieldKeys.stateChangeDate]: stateChangeDate
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.stateChangeDate.valueOf(), expectedDate.valueOf())
+      expect(realStory.stateChangeDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
     test('copies closed date', function () {
@@ -97,14 +96,13 @@ suite('work items', function () {
         [fieldKeys.closedDate]: closedDate
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.closedDate.valueOf(), expectedDate.valueOf())
+      expect(realStory.closedDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
     test('ignores closed date if undefined', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.isUndefined(realStory.closedDate)
-      assert.isFalse(Object.keys(realStory).includes('closedDate'))
+      expect(realStory).not.toHaveProperty('closedDate')
     })
 
     test('copies created by', function () {
@@ -121,7 +119,7 @@ suite('work items', function () {
         [fieldKeys.createdBy]: createdBy
       })
       const realStory = mapToUserStory(workItem)
-      assert.deepEqual(realStory.createdBy, expectedCreatedBy)
+      expect(realStory.createdBy).toEqual(expectedCreatedBy)
     })
 
     test('copies description', function () {
@@ -130,7 +128,7 @@ suite('work items', function () {
         [fieldKeys.description]: 'some description'
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.description, workItem.fields[fieldKeys.description])
+      expect(realStory.description).toEqual(workItem.fields[fieldKeys.description])
     })
 
     test('copies acceptance criteria', function () {
@@ -139,7 +137,7 @@ suite('work items', function () {
         [fieldKeys.acceptanceCriteria]: 'some acceptance criteria'
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.acceptanceCriteria, workItem.fields[fieldKeys.acceptanceCriteria])
+      expect(realStory.acceptanceCriteria).toEqual(workItem.fields[fieldKeys.acceptanceCriteria])
     })
 
     test('copies created date', function () {
@@ -150,7 +148,7 @@ suite('work items', function () {
         [fieldKeys.createdDate]: createdDate
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.createdDate.valueOf(), expectedDate.valueOf())
+      expect(realStory.createdDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
     test('copies activated date', function () {
@@ -161,13 +159,13 @@ suite('work items', function () {
         [fieldKeys.activatedDate]: activatedDate
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.activatedDate.valueOf(), expectedDate.valueOf())
+      expect(realStory.activatedDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
     test('ignores activated date if undefined', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.isUndefined(realStory.activatedDate)
+      expect(realStory).not.toHaveProperty('activatedDate')
     })
 
     test('copies activated by', function () {
@@ -183,14 +181,13 @@ suite('work items', function () {
         }
       })
       const realStory = mapToUserStory(workItem)
-      assert.deepEqual(realStory.activatedBy, expectedActivatedBy)
+      expect(realStory.activatedBy).toEqual(expectedActivatedBy)
     })
 
     test('ignores activated by if undefined', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.isUndefined(realStory.activatedBy)
-      assert.isFalse(Object.keys(realStory).includes('activatedBy'))
+      expect(realStory).not.toHaveProperty('activatedBy')
     })
 
     test('copies assigned to', function () {
@@ -206,23 +203,21 @@ suite('work items', function () {
         }
       })
       const realStory = mapToUserStory(workItem)
-      assert.deepEqual(realStory.assignedTo, expectedAssignedTo)
+      expect(realStory.assignedTo).toEqual(expectedAssignedTo)
     })
 
     test('ignores assigned to if undefined', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.isUndefined(realStory.assignedTo)
-      assert.isFalse(Object.keys(realStory).includes('assignedTo'))
+      expect(realStory).not.toHaveProperty('assignedTo')
     })
 
-    // eslint-disable-next-line mocha/no-setup-in-describe
     createBoardSamples().forEach(function (board) {
       test(`copies board with ${board.name}`, function () {
         const workItem = createBasicWorkItem()
         Object.assign(workItem.fields, board.data)
         const realStory = mapToUserStory(workItem)
-        assert.deepEqual(realStory.board, board.expected)
+        expect(realStory.board).toEqual(board.expected)
       })
     })
 
@@ -235,7 +230,7 @@ suite('work items', function () {
         [fieldKeys.boardColumn]: expectedBoard.column
       })
       const realStory = mapToUserStory(workItem)
-      assert.deepEqual(realStory.board, expectedBoard)
+      expect(realStory.board).toEqual(expectedBoard)
     })
 
     test('copies changed date', function () {
@@ -246,14 +241,13 @@ suite('work items', function () {
         [fieldKeys.changedDate]: changedDate
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.changedDate.valueOf(), expectedDate.valueOf())
+      expect(realStory.changedDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
     test('ignores changed date if undefined', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.isUndefined(realStory.changedDate)
-      assert.isFalse(Object.keys(realStory).includes('changedDate'))
+      expect(realStory).not.toHaveProperty('changedDate')
     })
 
     test('copies closed by', function () {
@@ -269,14 +263,13 @@ suite('work items', function () {
         }
       })
       const realStory = mapToUserStory(workItem)
-      assert.deepEqual(realStory.closedBy, expectedClosedBy)
+      expect(realStory.closedBy).toEqual(expectedClosedBy)
     })
 
     test('ignores closed by if undefined', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.isUndefined(realStory.closedBy)
-      assert.isFalse(Object.keys(realStory).includes('closedBy'))
+      expect(realStory).not.toHaveProperty('closedBy')
     })
 
     test('copies first activated date', function () {
@@ -287,14 +280,13 @@ suite('work items', function () {
         [fieldKeys.firstActivatedDate]: firstActivatedDate
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.firstActivatedDate.valueOf(), expectedDate.valueOf())
+      expect(realStory.firstActivatedDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
     test('ignores first activated date if undefined', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.isUndefined(realStory.firstActivatedDate)
-      assert.isFalse(Object.keys(realStory).includes('firstActivatedDate'))
+      expect(realStory).not.toHaveProperty('firstActivatedDate')
     })
 
     test('copies project', function () {
@@ -303,7 +295,7 @@ suite('work items', function () {
         [fieldKeys.teamProject]: 'Project'
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.project, workItem.fields[fieldKeys.teamProject])
+      expect(realStory.project).toEqual(workItem.fields[fieldKeys.teamProject])
     })
 
     test('copies revision', function () {
@@ -312,7 +304,7 @@ suite('work items', function () {
         rev: 42
       })
       const realStory = mapToUserStory(workItem)
-      assert.strictEqual(realStory.revision, workItem.rev)
+      expect(realStory.revision).toEqual(workItem.rev)
     })
 
     test('copies tags', function () {
@@ -322,14 +314,13 @@ suite('work items', function () {
         [fieldKeys.tags]: expectedTags.join(' ;')
       })
       const realStory = mapToUserStory(workItem)
-      assert.deepEqual(realStory.tags, expectedTags)
+      expect(realStory.tags).toEqual(expectedTags)
     })
 
     test('ignore tags if undefined', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      assert.isUndefined(realStory.tags)
-      assert.isFalse(Object.keys(realStory).includes('tags'))
+      expect(realStory).not.toHaveProperty('tags')
     })
 
     function createBasicWorkItem () {
