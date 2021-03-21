@@ -16,7 +16,7 @@
  * @param {Identity} identity Identity to map to a Person object.
  * @returns {Person} Object that represents a person.
  */
-export default function mapToPerson (identity) {
+function mapToPerson (identity) {
   if (!identity) {
     return
   }
@@ -26,3 +26,5 @@ export default function mapToPerson (identity) {
     email: identity.uniqueName
   }
 }
+
+module.exports = mapToPerson
