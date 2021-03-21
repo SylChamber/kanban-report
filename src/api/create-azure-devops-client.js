@@ -1,4 +1,4 @@
-import createTeamMembersGetter from './get-team-members.js'
+const createTeamMembersGetter = require('./get-team-members')
 
 /**
  * @module api/createAzureDevopsClientFactory
@@ -10,7 +10,7 @@ import createTeamMembersGetter from './get-team-members.js'
  * @returns {CreateAzureDevopsClient} A function that creates a client that permits access to Azure DevOps data.
  * @throws {ReferenceError} "fetch" is not defined
  */
-export default function createAzureDevopsClientFactory (fetch) {
+function createAzureDevopsClientFactory (fetch) {
   // fetch is injected because it makes it simpler to mock in tests without a mocking framework.
   if (fetch === undefined) {
     throw new ReferenceError('"fetch" is not defined')
@@ -77,3 +77,5 @@ export default function createAzureDevopsClientFactory (fetch) {
  * @typedef {object} AzureDevopsClient Client for the Azure DevOps REST API.
  * @property {function(string): Promise<Person[]>} getTeamMembers Gets the members for the specified team.
  */
+
+module.exports = createAzureDevopsClientFactory
