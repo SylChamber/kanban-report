@@ -1,8 +1,7 @@
-import { assert } from 'chai'
-import mapToBoard from './map-to-board.js'
+const mapToBoard = require('./map-to-board')
 
-suite('work items', function () {
-  suite('mapToBoard', function () {
+describe('work items', function () {
+  describe('mapToBoard', function () {
     test('copies column', function () {
       const item = {
         fields: {
@@ -10,20 +9,13 @@ suite('work items', function () {
         }
       }
       const board = mapToBoard(item)
-      assert.strictEqual(board.column, item.fields['System.BoardColumn'])
+      expect(board.column).toEqual(item.fields['System.BoardColumn'])
     })
 
     test('copies column done', function () {
       const item = createBoardWithColumnDone()
       const board = mapToBoard(item)
-      assert.strictEqual(board.columnDone, item.fields['System.BoardColumnDone'])
-    })
-
-    test('ignores column done if undefined', function () {
-      const item = createBasicBoard()
-      const board = mapToBoard(item)
-      assert.isUndefined(board.columnDone)
-      assert.isFalse(Object.keys(board).includes('columnDone'))
+      expect(board.columnDone).toEqual(item.fields['System.BoardColumnDone'])
     })
 
     test('copies lane', function () {
@@ -32,14 +24,7 @@ suite('work items', function () {
         [fieldKeys.lane]: 'Urgent'
       })
       const board = mapToBoard(item)
-      assert.strictEqual(board.lane, item.fields[fieldKeys.lane])
-    })
-
-    test('ignores lane if undefined', function () {
-      const item = createBasicBoard()
-      const board = mapToBoard(item)
-      assert.isUndefined(board.lane)
-      assert.isFalse(Object.keys(board).includes('lane'))
+      expect(board.lane).toEqual(item.fields[fieldKeys.lane])
     })
 
     test('copies rank', function () {
@@ -48,14 +33,25 @@ suite('work items', function () {
         [fieldKeys.rank]: 588946
       })
       const board = mapToBoard(item)
-      assert.strictEqual(board.rank, item.fields[fieldKeys.rank])
+      expect(board.rank).toEqual(item.fields[fieldKeys.rank])
+    })
+
+    test('ignores column done if undefined', function () {
+      const item = createBasicBoard()
+      const board = mapToBoard(item)
+      expect(board).not.toHaveProperty('columnDone')
+    })
+
+    test('ignores lane if undefined', function () {
+      const item = createBasicBoard()
+      const board = mapToBoard(item)
+      expect(board).not.toHaveProperty('lane')
     })
 
     test('ignore rank if undefined', function () {
       const item = createBasicBoard()
       const board = mapToBoard(item)
-      assert.isUndefined(board.rank)
-      assert.isFalse(Object.keys(board).includes('rank'))
+      expect(board).not.toHaveProperty('rank')
     })
 
     function createBasicBoard () {

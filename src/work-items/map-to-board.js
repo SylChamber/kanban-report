@@ -26,7 +26,7 @@
  * @param {WorkItem} item - Work item to map to a Board object.
  * @returns {BoardLocation} The location of the item on the board.
  */
-export default function mapToBoard (item) {
+function mapToBoard (item) {
   const board = {
     column: item.fields[fieldKeys.column]
   }
@@ -58,3 +58,5 @@ const fieldKeys = {
   lane: 'System.BoardLane',
   rank: 'Microsoft.VSTS.Common.StackRank'
 }
+
+module.exports = mapToBoard
