@@ -1,6 +1,6 @@
 // using base-64 package so it works both in Node.js and browsers
-import base64 from 'base-64'
-import mapToPerson from '../teams/map-to-person.js'
+const base64 = require('base-64')
+const mapToPerson = require('../teams/map-to-person')
 
 /**
  * @module api/createTeamMembersGetter
@@ -12,7 +12,7 @@ import mapToPerson from '../teams/map-to-person.js'
  * @param {fetch} fetch Interface that fetches resources from the network.
  * @returns {getTeamMembers} Function that gets the members for the specified team.
  */
-export default function createTeamMembersGetter (options, fetch) {
+function createTeamMembersGetter (options, fetch) {
   if (options === undefined) {
     throw new ReferenceError('"options" is not defined')
   }
@@ -87,3 +87,5 @@ export default function createTeamMembersGetter (options, fetch) {
  * @property {TeamMember[]} value - Array of team members.
  * @property {number} count - Count of team members.
  */
+
+module.exports = createTeamMembersGetter
