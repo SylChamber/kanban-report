@@ -33,7 +33,7 @@ describe('createTeamMembersGetter', function () {
   test('returns a function', function () {
     const options = { organization: 'org', personalAccessToken: 'token', project: 'proj' }
     const fn = createTeamMembersGetter(options, {})
-    expect(typeof fn).toBe('function')
+    expect(fn).toBeInstanceOf(Function)
   })
 })
 

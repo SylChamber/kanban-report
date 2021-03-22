@@ -68,7 +68,7 @@ function createTeamMembersGetter (options, fetch) {
 /**
  * @typedef {import('../teams/map-to-person').Identity} Identity
  * @typedef {import('../teams/map-to-person').Person} Person
- * @typedef {import('./create-azure-devops-client').AzureDevopsClientOptions} AzdevClientOptions
+ * @typedef {import('./create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
  * @typedef {import('./create-azure-devops-client').fetch} fetch
  * @typedef {import('node-fetch').RequestInfo} RequestInfo
  * @typedef {import('node-fetch').RequestInit} RequestInit
