@@ -220,18 +220,6 @@ describe('mapToUserStory', function () {
     })
   })
 
-  test('copies board column', function () {
-    const expectedBoard = {
-      column: 'Doing'
-    }
-    const workItem = createBasicWorkItem()
-    Object.assign(workItem.fields, {
-      [fieldKeys.boardColumn]: expectedBoard.column
-    })
-    const realStory = mapToUserStory(workItem)
-    expect(realStory.board).toEqual(expectedBoard)
-  })
-
   test('copies changed date', function () {
     const changedDate = '2021-03-31T12:12:12Z'
     const expectedDate = new Date(changedDate)
