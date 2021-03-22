@@ -1,80 +1,20 @@
 # Kanban Report
 
-## working with the Azure DevOps Node API
+Kanban Report is meant to be a library for making a report of activity in an Azure DevOps team, for Scrum Masters and managers. It aims to be useful in a team adopting Agile practices, and was primarily built for my needs as a Scrum/Kanban master.
 
-```javascript
-// import the azdev API
-import * as azdev from 'azure-devops-node-api'
+## Tooling and branches
 
-// set up a connection to an org
-const orgUrl = 'https://dev.azure.com/{org}'
-const token = process.env.AZURE_DEVOPS_EXT_PAT
-const authHandler = azdev.getPersonalAccessTokenHandler(token)
-const connection = new azdev.WebApi(orgUrl, authHandler)
+The project started as an ECMAScript module with Mocha tests because I could not get Jest to work with ESM modules. However I could not make test coverage work either. I converted everything and now, the main branch is built as a CommonJS package with tests with Jest and test coverage.
 
-// getting a Work Items Tracking API
-const witApi = await connection.getWorkItemTrackingApi()
+It works rather well in Visual Studio Code with the [Jest extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest). However ― even though the Jest tool reports correctly on all tests ― the Jest extension has problems with parameterized tests with `test.each` and does not run or debug them.
 
-// querying work items batch
-const req = {
-  ids = [ 1224, 1339 ],
-  $expand = 'All'
-}
-const workItems = await witApi.getWorkItemsBatch(req, '<project>')
-```
+Another option (with a cost) is the [Wallaby.js](https://wallabyjs.com/) extension, which works really, really well. [WebStorm](https://www.jetbrains.com/webstorm/) may be a cheaper alternative but I haven't tried it.
 
-## Mapping user stories
+The source and unit tests are under `src`, while functional specifications are described under `specs` in [Gherkin](https://cucumber.io/docs/gherkin/reference/) format (see the [Cucumber introduction](https://cucumber.io/docs/guides/overview/)).
 
-```javascript
-const mapToUserStory = item => {
-  const closedBy = 'Microsoft.VSTS.Common.ClosedBy'
-  const closedDate = 'Microsoft.VSTS.Common.ClosedDate'
+An HTML report is generated with `jest-html-reporters` at the root level as `test-report.html`.
 
-  let story = {
-    id: item.id,
-    workItemType: item.fields['System.WorkItemType'],
-    areaPath: item.fields['System.AreaPath'],
-    title: item.fields['System.Title'],
-    description: item.fields['System.Description'],
-    board: mapToBoard(item),
-    state: item.fields['System.State'],
-    assignedTo: mapToPerson(item.fields['System.AssignedTo']),
-    acceptanceCriteria: item.fields['Microsoft.VSTS.Common.AcceptanceCriteria'],
-    changedDate: new Date(item.fields['System.ChangedDate']),
-    closedDate: item.fields[closedDate]) ?
-      new Date(item.fields[closedDate]) :
-      undefined,
-    closedBy: mapToPerson(item.fields[closedBy]),
-    tags: item.fields['System.Tags'].split(' '),
-    url: item.url
-  }
+The main branch is... `main`. The following branches were made to test both approaches (ESM/Mocha vs CommonJS/Jest) and are both obsolete:
 
-  return story
-}
-
-const mapToPerson = identity => {
-
-  if (!identity) {
-    return undefined
-  }
-
-  let person = {
-    name: identity.displayName,
-    email: identity.uniqueName
-  }
-
-  return person
-}
-
-const mapToBoard = item => {
-  let board = {
-    column: item.fields['System.BoardColumn'],
-    done: item.fields['System.BoardColumnDone'],
-    lane: item.fields['System.BoardLane'],
-    rank: item.fields['Microsoft.VSTS.Common.StackRank']
-  }
-
-  return board
-}
-
-```
+* cjs-jest
+* esm-mocha
