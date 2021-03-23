@@ -4,26 +4,26 @@ Fonctionnalité: Les maîtres Scrum peuvent observer l'état de la communication
   En tant que maître Scrum
   Je veux un rapport quotidien d'activité dans le tableau Kanban
 
-  Plan du scénario: Le rapport affiche les commentaires publiés le jour ouvrable précédent
+  Plan du scénario: Le rapport affiche les commentaires du jour ouvrable précédent
 
-    Soit ces commentaires publiés précédemment dans le tableau
-      | jour     | membre    | no carte |
-      | mercredi | Jean      | 1        |
-      | vendredi | Esther    | 2        |
-      | dimanche | Guillaume | 3        |
-      | lundi    | Julie     | 4        |
-      | mardi    |           |          |
-    Quand Robert affiche le rapport quotidien le <jour>
-    Alors il devrait voir <commentaires>
-
-    # jour est dans la plage de jours du tableau précédent (mercredi à mardi)
+    Soit un commentaire publié précédemment le <jour de création> mais modifié le <jour de modification>
+    Quand Robert affiche le rapport quotidien le <jour du rapport> suivant
+    Alors il devrait <voir?> le commentaire
 
     Exemples: Le rapport liste les commentaires publiés le jour ouvrable précédent
-      | jour     | commentaires      |
-      | jeudi    | "Jean (no 1)"     |
-      | vendredi | aucun commentaire |
+      | jour de création | jour de modification | jour du rapport | voir?       |
+      | lundi            |                      | mardi           | voir        |
+      | lundi            |                      | mercredi        | ne pas voir |
+      | vendredi         |                      | lundi           | voir        |
 
-    Exemples: Le lundi, le rapport liste les commentaires publiées pendant le weekend
-      | jour  | commentaires                    |
-      | lundi | "Esther (#2)", "Guillaume (#3)" |
-      | mardi | "Julie (#4)"                    |
+    Exemples: Le lundi, le rapport liste les commentaires publiés pendant le weekend
+      | jour de création | jour de modification | jour du rapport | voir?       |
+      | vendredi         |                      | lundi           | voir        |
+      | dimanche         |                      | lundi           | voir        |
+      | dimanche         |                      | mardi           | ne pas voir |
+
+    Exemples: Le rapport liste les commentaires modifiés le jour ouvrable précédent
+      | jour de création | jour de modification | jour du rapport | voir?       |
+      | lundi            |                      | mercredi        | ne pas voir |
+      | lundi            | mardi                | mercredi        | voir        |
+      | jeudi            | samedi               | lundi           | voir        |

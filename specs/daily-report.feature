@@ -4,26 +4,26 @@ Feature: Scrum Masters can observe the state of communication in their team in a
   As a Scrum master
   I want a daily report of activity in the Kanban board
 
-  Scenario Outline: The report displays comments posted the previous workday
+  Scenario Outline: The report displays comments from the previous workday
 
-    Given those comments previously posted in the board
-      | day       | member | card # |
-      | Wednesday | John   | 1      |
-      | Friday    | Esther | 2      |
-      | Sunday    | Bill   | 3      |
-      | Monday    | Julia  | 4      |
-      | Tuesday   |        |        |
-    When Robert displays the daily report on <day>
-    Then he should see <comments>
-
-    # day is in the range of days in the preceding table (Wednesday to Tuesday)
+    Given a comment previously posted on <creation day> but modified on <modification day>
+    When Robert displays the daily report on the following <report day>
+    Then he should <see?> the comment
 
     Examples: The report lists comments posted the previous workday
-      | day      | comments    |
-      | Thursday | "John (#1)" |
-      | Friday   | no comments |
+      | creation day | modification day | report day | see?    |
+      | Monday       |                  | Tuesday    | see     |
+      | Monday       |                  | Wednesday  | not see |
+      | Friday       |                  | Monday     | see     |
 
     Examples: On a Monday, the report lists comments posted during the weekend
-      | day     | comments                   |
-      | Monday  | "Esther (#2)", "Bill (#3)" |
-      | Tuesday | "Julia (#4)"               |
+      | creation day | modification day | report day | see?    |
+      | Friday       |                  | Monday     | see     |
+      | Sunday       |                  | Monday     | see     |
+      | Sunday       |                  | Tuesday    | not see |
+
+    Examples: The report lists comments modified the previous workday
+      | creation day | modification day | report day | see?    |
+      | Monday       |                  | Wednesday  | not see |
+      | Monday       | Tuesday          | Wednesday  | see     |
+      | Thursday     | Saturday         | Monday     | see     |
