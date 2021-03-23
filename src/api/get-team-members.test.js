@@ -41,14 +41,14 @@ describe('getTeamMembers', function () {
   test.each([
     ['undefined', undefined],
     ['empty string', '']
-  ])('requires team (%s)', function (name, team) {
+  ])('requires team (%s)', function requiresTeam (name, team) {
     const fetch = createFetchStub().fetch
     const getTeamMembers = createTeamMembersGetter(options, fetch)
     const promise = getTeamMembers(team)
     return expect(promise).rejects.toThrow(new ReferenceError('"team" is not defined'))
   })
 
-  test('calls fetch with right headers', async function () {
+  test('calls fetch with right parameters', async function () {
     const fetchStub = createFetchStub()
     const team = 'teamd'
     const expected = {
