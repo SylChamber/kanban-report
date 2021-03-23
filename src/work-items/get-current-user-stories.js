@@ -25,40 +25,50 @@ function createGetUserStoriesGetter (options, fetch) {
   }
 
   return getCurrentUserStories
-}
 
-/**
+  /**
  * Gets the current user stories at the reference date specified in the options,
  * e.g. the active stories and the stories closed during the reference date.
  * @param {UserStoryOptions} userStoryOptions - Options for getting user stories.
  * @returns {Promise<UserStoriesResult>} A promise that resolves in a result of user stories that were current at the specified reference date.
  */
-async function getCurrentUserStories (userStoryOptions) {
-  if (userStoryOptions === undefined) {
-    throw new ReferenceError('"userStoryOptions" is not defined')
-  }
+  async function getCurrentUserStories (userStoryOptions) {
+    if (userStoryOptions === undefined) {
+      throw new ReferenceError('"userStoryOptions" is not defined')
+    }
 
-  if (userStoryOptions.activeStates === undefined) {
-    throw new TypeError('The "userStoryOptions.activeStates" is not defined')
-  }
+    if (userStoryOptions.activeStates === undefined) {
+      throw new TypeError('The "userStoryOptions.activeStates" is not defined')
+    }
 
-  if (userStoryOptions.activeStates.length === 0) {
-    throw new TypeError('The "userStoryOptions.activeStates" must not be empty')
-  }
+    if (userStoryOptions.activeStates.length === 0) {
+      throw new TypeError('The "userStoryOptions.activeStates" must not be empty')
+    }
 
-  if (userStoryOptions.areaPath === undefined || userStoryOptions.areaPath === '') {
-    throw new TypeError('The "userStoryOptions.areaPath" property is not defined')
-  }
+    if (userStoryOptions.areaPath === undefined || userStoryOptions.areaPath === '') {
+      throw new TypeError('The "userStoryOptions.areaPath" property is not defined')
+    }
 
-  if (userStoryOptions.referenceDate === undefined) {
-    userStoryOptions.referenceDate = new Date()
-  }
+    const url = `${options.url}/${options.organization}/${options.project}/_apis/wit/wiql`
+    const states = userStoryOptions.activeStates.map(s => `'${s}'`).join(', ')
+    const asOf = userStoryOptions.referenceDate
+      ? ` ASOF '${userStoryOptions.referenceDate?.toISOString()}'`
+      : ''
+    const query = `Select Id from WorkItems where [Work Item Type] = 'User Story' and [Area Path] under '${userStoryOptions.areaPath}' and (State in (${states}) or (State = 'Closed' and [Closed Date] >= @Today - 1)) order by [Changed Date] DESC${asOf}`
+    const fetchOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    }
 
-  return new Promise((resolve) => {
-    resolve({
-      referenceDate: new Date(userStoryOptions.referenceDate)
+    await fetch(url, fetchOptions)
+
+    return new Promise((resolve) => {
+      resolve({
+        referenceDate: userStoryOptions.referenceDate
+      })
     })
-  })
+  }
 }
 
 /**

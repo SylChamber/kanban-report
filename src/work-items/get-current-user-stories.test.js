@@ -37,7 +37,19 @@ describe('createCurrentGetUserStoriesGetter', () => {
 })
 
 describe('getCurrentUserStories', () => {
-  const options = { organization: 'org', personalAccessToken: 'token', project: 'proj' }
+  /**
+   * @type {import('../api/create-azure-devops-client').AzureDevopsClientOptions}
+   */
+  const options = {
+    organization: 'org',
+    personalAccessToken: 'token',
+    project: 'proj',
+    url: 'https://devops'
+  }
+
+  beforeAll(() => {
+    jest.useFakeTimers('modern')
+  })
 
   test('requires user story options', async () => {
     const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, jest.fn())
@@ -64,6 +76,54 @@ describe('getCurrentUserStories', () => {
     return expect(fn).rejects.toThrow(error)
   })
 
+  describe('calls fetch', () => {
+    test('with right url', async () => {
+      /**
+       * @type {import('./get-current-user-stories').UserStoryOptions}
+       */
+      const storyOptions = {
+        activeStates: ['Active', 'Resolved'],
+        areaPath: 'area51',
+        referenceDate: new Date('2020-02-20T20:00:00Z')
+      }
+      const expectedUrl = `${options.url}/${options.organization}/${options.project}/_apis/wit/wiql`
+      const fetchSub = jest.fn().mockName('fetchSub')
+      const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, fetchSub)
+      await getCurrentUserStories(storyOptions)
+      expect(fetchSub).toHaveBeenCalledWith(expectedUrl, expect.anything())
+    })
+
+    test.each([
+      ['with reference date', new Date('2020-02-20T20:00:00Z')],
+      ['without reference date', undefined]
+    ])('with right options (%s)', async function withRightOptions (testName, refDate) {
+      /**
+       * @type {import('./get-current-user-stories').UserStoryOptions}
+       */
+      const storyOptions = {
+        activeStates: ['Active', 'Resolved'],
+        areaPath: 'area51',
+        referenceDate: refDate
+      }
+      const statesString = storyOptions.activeStates.map(s => `'${s}'`).join(', ')
+      const asOf = refDate
+        ? ` ASOF '${storyOptions.referenceDate.toISOString()}'`
+        : ''
+      const expectedQuery = `Select Id from WorkItems where [Work Item Type] = 'User Story' and [Area Path] under '${storyOptions.areaPath}' and (State in (${statesString}) or (State = 'Closed' and [Closed Date] >= @Today - 1)) order by [Changed Date] DESC${asOf}`
+      const expectedOptions = {
+        body: JSON.stringify({ query: expectedQuery }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'POST'
+      }
+      const fetchSub = jest.fn().mockName('fetchSub')
+      const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, fetchSub)
+      await getCurrentUserStories(storyOptions)
+      expect(fetchSub).toHaveBeenCalledWith(expect.anything(), expectedOptions)
+    })
+  })
+
   test('returns reference date', async () => {
     const storyOptions = {
       activeStates: ['Active'],
@@ -75,12 +135,9 @@ describe('getCurrentUserStories', () => {
     expect(result).toHaveProperty('referenceDate')
     expect(result.referenceDate).toEqual(storyOptions.referenceDate)
   })
-
-  test('returns current date if reference date was not provided', async () => {
-    const storyOptions = { activeStates: ['Active'], areaPath: 'area51' }
-    const fetchSpy = jest.fn().mockName('jestSpy')
-    const getUserStories = createGetCurrentUserStoriesGetter(options, fetchSpy)
-    const result = await getUserStories(storyOptions)
-    expect(result.referenceDate.toLocaleDateString()).toEqual(new Date().toLocaleDateString())
-  })
 })
+
+/**
+ * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions}
+ * @typedef {import('./get-current-user-stories').UserStoryOptions}
+ */
