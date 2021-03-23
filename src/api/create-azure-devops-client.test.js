@@ -21,30 +21,37 @@ describe('createAzureDevopsClient', function () {
   })
 
   test('requires organization', function () {
-    const options = { project: 'proj', personalAccessToken: 'token' }
+    const options = { project: 'proj', personalAccessToken: 'token', url: 'https://devops' }
     const fn = opt => createAzureDevopsClientFactory({})(options)
     expect(fn).toThrow(new TypeError('The "options.organization" property is not defined'))
   })
 
   test('requires project', function () {
-    const options = { organization: 'org', personalAccessToken: 'token' }
+    const options = { organization: 'org', personalAccessToken: 'token', url: 'https://devops' }
     const fn = opt => createAzureDevopsClientFactory({})(options)
     expect(fn).toThrow(new TypeError('The "options.project" property is not defined'))
   })
 
   test('requires personal access token', function () {
-    const options = { organization: 'org', project: 'proj' }
+    const options = { organization: 'org', project: 'proj', url: 'https://devops' }
     const fn = opt => createAzureDevopsClientFactory({})(options)
     expect(fn).toThrow(new TypeError('The "options.personalAccessToken" property is not defined'))
+  })
+
+  test('requires url', () => {
+    const options = { organization: 'org', personalAccessToken: 'token', project: 'proj' }
+    const fn = opt => createAzureDevopsClientFactory({})(options)
+    expect(fn).toThrow(new TypeError('The "options.url" property is not defined'))
   })
 })
 
 describe('AzureDevopsClient', function () {
   test('exposes getTeamMembers', function () {
     const options = {
-      organization: process.env.AZURE_DEVOPS_ORG,
-      project: process.env.AZURE_DEVOPS_PROJECT,
-      personalAccessToken: process.env.AZURE_DEVOPS_EXT_PAT
+      organization: 'org',
+      project: 'project',
+      personalAccessToken: 'token',
+      url: 'https://devops'
     }
     const client = createAzureDevopsClientFactory(function () {})(options)
     expect(client).toHaveProperty('getTeamMembers')
@@ -57,7 +64,8 @@ describe('AzureDevopsClient', function () {
       const options = {
         organization: process.env.AZURE_DEVOPS_ORG,
         project: process.env.AZURE_DEVOPS_PROJECT,
-        personalAccessToken: process.env.AZURE_DEVOPS_EXT_PAT
+        personalAccessToken: process.env.AZURE_DEVOPS_EXT_PAT,
+        url: process.env.AZURE_DEVOPS_URL
       }
       const team = process.env.AZURE_DEVOPS_TEAM
       const client = createAzureDevopsClientFactory(fetch)(options)

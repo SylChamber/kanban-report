@@ -42,6 +42,10 @@ function createAzureDevopsClientFactory (fetch) {
       throw new TypeError('The "options.personalAccessToken" property is not defined')
     }
 
+    if (options.url === undefined) {
+      throw new TypeError('The "options.url" property is not defined')
+    }
+
     return {
       getTeamMembers: createTeamMembersGetter(options, fetch)
     }
@@ -66,6 +70,7 @@ function createAzureDevopsClientFactory (fetch) {
  * @property {string} organization - Organization that hosts the data in Azure DevOps.
  * @property {string} project - Project the team is part of.
  * @property {string} personalAccessToken - Personal access token that allows access to Azure DevOps.
+ * @property {string} url - The url for Azure DevOps.
  */
 
 /**
