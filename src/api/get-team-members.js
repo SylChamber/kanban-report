@@ -1,5 +1,3 @@
-// using base-64 package so it works both in Node.js and browsers
-const base64 = require('base-64')
 const mapToPerson = require('../teams/map-to-person')
 
 /**
@@ -47,14 +45,8 @@ function createTeamMembersGetter (options, fetch) {
     }
 
     const url = `https://dev.azure.com/${options.organization}/_apis/projects/${options.project}/teams/${team}/members`
-    const fetchOptions = {
-      headers: {
-        Authorization: `Basic ${base64.encode(`:${options.personalAccessToken}`)}`,
-        'Content-Type': 'application/json'
-      }
-    }
     const mapMemberToPerson = member => mapToPerson(member.identity)
-    const response = await fetch(url, fetchOptions)
+    const response = await fetch(url)
 
     /**
      * @type {TeamMembersResult}

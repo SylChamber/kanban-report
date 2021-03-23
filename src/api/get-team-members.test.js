@@ -52,13 +52,7 @@ describe('getTeamMembers', function () {
     const fetchStub = createFetchStub()
     const team = 'teamd'
     const expected = {
-      url: `https://dev.azure.com/${options.organization}/_apis/projects/${options.project}/teams/${team}/members`,
-      options: {
-        headers: {
-          Authorization: `Basic ${Buffer.from(`:${options.personalAccessToken}`).toString('base64')}`,
-          'Content-Type': 'application/json'
-        }
-      }
+      url: `https://dev.azure.com/${options.organization}/_apis/projects/${options.project}/teams/${team}/members`
     }
     fetchStub.setExpectedCall(expected)
     const getTeamMembers = createTeamMembersGetter(options, fetchStub.fetch)
