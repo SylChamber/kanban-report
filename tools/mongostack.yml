@@ -1,0 +1,19 @@
+# Run MongoDB in a container
+# docker-compose -f tools/mongostack.yml -d up
+version: '3.9'
+
+volumes:
+  data:
+    name: mongodata
+
+services:
+  db:
+    image: mongo
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - data:/data/db

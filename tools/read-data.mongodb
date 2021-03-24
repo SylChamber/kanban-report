@@ -1,0 +1,5 @@
+// MongoDB Playground
+
+// Select the database to use.
+use('kanban-report');
+db.stories.find({ id: 1});
