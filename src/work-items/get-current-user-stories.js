@@ -1,9 +1,9 @@
 /**
- * Creates a function that gets user stories from Azure DevOps.
+ * Creates a function that gets current user stories from Azure DevOps.
  * @param {import("../api/create-azure-devops-client").AzureDevopsClientOptions} options Options for accessing Azure DevOps data.
  * @param {import("../api/create-azure-devops-client").fetch} fetch Interface that fetches resources from the network.
  */
-function createGetUserStoriesGetter (options, fetch) {
+function createGetCurrentUserStoriesGetter (options, fetch) {
   if (options === undefined) {
     throw new ReferenceError('"options" is not defined')
   }
@@ -61,15 +61,24 @@ function createGetUserStoriesGetter (options, fetch) {
       body: JSON.stringify({ query })
     }
 
-    await fetch(url, fetchOptions)
+    const response = await fetch(url, fetchOptions)
+    /**
+     * @type {WiqlApiResult}
+     */
+    const result = await response.json()
 
-    return new Promise((resolve) => {
-      resolve({
-        referenceDate: userStoryOptions.referenceDate
-      })
-    })
+    return {
+      referenceDate: new Date(result.asOf),
+      stories: result.workItems
+    }
   }
 }
+
+/**
+ * @typedef {object} WiqlApiResult
+ * @property {string} asOf - Date of reference of the data in ISO format
+ * @property {UserStoryReference[]} workItems - Work item references returned by the API.
+ */
 
 /**
  * Options for getting user stories.
@@ -83,6 +92,14 @@ function createGetUserStoriesGetter (options, fetch) {
  * Result of a query on current user stories.
  * @typedef {object} UserStoriesResult
  * @property {Date} referenceDate - The reference date at which the user stories were current.
+ * @property {UserStoryReference[]} stories - The user story references returned by the query.
  */
 
-module.exports = createGetUserStoriesGetter
+/**
+ * User Story reference with its ID and URL in Azure DevOps.
+ * @typedef {object} UserStoryReference
+ * @property {number} id - ID of the user story.
+ * @property {string} url - URL of the user story in the REST API.
+ */
+
+module.exports = createGetCurrentUserStoriesGetter
