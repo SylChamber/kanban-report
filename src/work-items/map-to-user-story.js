@@ -77,6 +77,12 @@ function mapToUserStory (item) {
     })
   }
 
+  if (item.fields[fieldKeys.changedBy]) {
+    Object.assign(story, {
+      changedBy: mapToPerson(item.fields[fieldKeys.changedBy])
+    })
+  }
+
   if (item.fields[fieldKeys.changedDate]) {
     Object.assign(story, {
       changedDate: new Date(item.fields[fieldKeys.changedDate])
@@ -140,5 +146,9 @@ const fieldKeys = {
   title: 'System.Title',
   workItemType: 'System.WorkItemType'
 }
+
+/**
+ * @typedef {object} WorkItem
+ */
 
 module.exports = mapToUserStory
