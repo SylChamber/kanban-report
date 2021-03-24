@@ -1,4 +1,4 @@
-const createTeamMembersGetter = require('./get-team-members')
+const createTeamMembersGetter = require('../teams/get-team-members')
 
 /**
  * @module api/createAzureDevopsClientFactory

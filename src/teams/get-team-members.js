@@ -1,4 +1,4 @@
-const mapToPerson = require('../teams/map-to-person')
+const mapToPerson = require('./map-to-person')
 
 /**
  * @module api/createTeamMembersGetter
@@ -58,10 +58,10 @@ function createTeamMembersGetter (options, fetch) {
 }
 
 /**
- * @typedef {import('../teams/map-to-person').Identity} Identity
- * @typedef {import('../teams/map-to-person').Person} Person
- * @typedef {import('./create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
- * @typedef {import('./create-azure-devops-client').fetch} fetch
+ * @typedef {import('./map-to-person').Identity} Identity
+ * @typedef {import('./map-to-person').Person} Person
+ * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
+ * @typedef {import('../api/create-azure-devops-client').fetch} fetch
  * @typedef {import('node-fetch').RequestInfo} RequestInfo
  * @typedef {import('node-fetch').RequestInit} RequestInit
  * @typedef {import('node-fetch').Response} Response
