@@ -49,7 +49,7 @@ describe('decoratedFetch', () => {
       const fetch = jest.fn().mockName('fetchMock')
       const token = 'token'
       const expectedHeaders = {
-        Accept: 'application/json',
+        Accept: 'application/json; api-version=6.0',
         Authorization: `Basic ${Buffer.from(`:${token}`).toString('base64')}`
       }
       const expectedOptions = { ...options, headers: { ...options?.headers, ...expectedHeaders } }

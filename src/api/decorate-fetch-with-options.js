@@ -34,7 +34,7 @@ function decorateFetchWithAuthHeader (fetch, personalAccessToken) {
     }
 
     const headersToAdd = {
-      Accept: 'application/json',
+      Accept: 'application/json; api-version=6.0',
       Authorization: `Basic ${base64.encode(`:${personalAccessToken}`)}`
     }
     const newOptions = { ...options, headers: { ...options?.headers, ...headersToAdd } }
