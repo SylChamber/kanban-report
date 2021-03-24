@@ -8,36 +8,36 @@ db.stories.insertMany([
     '_id': 1,
     id: 1,
     acceptanceCriteria: 'here are some criteria for you!',
+    activatedBy: {
+      name: 'Some Poor Bastard',
+      email: 'some.poor.bastard@dev.com'
+    },
+    activatedDate: new Date('2021-02-11T18:33:17.520Z'),
     areaPath: 'Team',
+    assignedTo: {
+      name: 'Some Poor Bastard',
+      email: 'some.poor.bastard@dev.com'
+    },
     board: {
       column: 'Doing',
       columnDone: false,
       lane: 'Standard',
       rank: 100
     },
+    changedDate: new Date('2021-03-24T12:35:33.887Z'),
     createdBy: {
       name: 'Some Dude',
       email: 'some.dude@example.com'
     },
     createdDate: new Date('2020-12-04T21:34:55.727Z'),
     description: 'See here, I want this thingamajig to do something big.',
+    firstActivatedDate: new Date('2021-02-11T05:00:00.000Z'),
     project: 'Project',
     revision: 1,
     state: 'Active',
     stateChangeDate: new Date('2021-02-11T18:33:17.520Z'),
     stateReason: 'Implementation started',
     title: "Could you do me a favor?",
-    workItemType: 'User Story',
-    activatedBy: {
-      name: 'Some Poor Bastard',
-      email: 'some.poor.bastard@dev.com'
-    },
-    activatedDate: new Date('2021-02-11T18:33:17.520Z'),
-    assignedTo: {
-      name: 'Some Poor Bastard',
-      email: 'some.poor.bastard@dev.com'
-    },
-    changedDate: new Date('2021-03-24T12:35:33.887Z'),
-    firstActivatedDate: new Date('2021-02-11T05:00:00.000Z')
+    workItemType: 'User Story'
   }
 ]);
