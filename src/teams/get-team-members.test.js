@@ -57,7 +57,7 @@ describe('getTeamMembers', function () {
     fetchStub.setExpectedCall(expected)
     const getTeamMembers = createTeamMembersGetter(options, fetchStub.fetch)
     await getTeamMembers(team)
-    const fetchWasCalled = fetchStub.wasCalledWith(expected.url, expected.options)
+    const fetchWasCalled = fetchStub.wasCalledWith(expected.url)
     if (!fetchWasCalled) {
       throw new Error(fetchStub.getErrorMessage())
     }
