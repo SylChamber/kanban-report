@@ -18,3 +18,14 @@ The main branch is... `main`. The following branches were made to test both appr
 
 * cjs-jest
 * esm-mocha
+
+## Data Aggregation
+
+Some notes on data aggregation.
+
+We want to know:
+
+* how much time stories spend on each stage (*state*, *column* and the *doing/done* subcolumn)
+* how many rollbacks stories do (for example, *active* → *new* → *active*)
+
+These metrics should be available for categories of stories (e.g. *area paths*) and percentiles (for example, *x* days on *y* stage at 85% probability). So it's best to store these metrics for individual stories and have their closed dates.
