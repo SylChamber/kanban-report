@@ -1,0 +1,47 @@
+db.transitions.aggregate([
+  {
+    $sort: {
+      changedDate: 1
+    }
+  },
+  {
+    $group: {
+      _id: "$id",
+      trans: {
+        $push: {
+          activatedDate: '$activatedDate',
+          areaPath: '$areaPath',
+          board: '$board',
+          changedDate: '$changedDate',
+          closedDate: '$closedDate',
+          createdDate: '$createdDate',
+          firstActivatedDate: '$firstActivatedDate',
+          iterationPath: '$iterationPath',
+          resolvedDate: '$resolvedDate',
+          state: "$state",
+          stateChangeDate: '$stateChangeDate',
+        }
+      },
+      activatedDate: { $mergeObjects: { activatedDate: '$trans.activatedDate' } }
+    }
+  },
+  {
+    $addFields: {
+      areaPath: { $last: '$trans.areaPath' },
+      iterationPath: { $last: '$trans.iterationPath' },
+      createdDate: { $first: '$trans.createdDate' },
+      closedDate: { $last: '$trans.closedDate' }
+    }
+  }
+])
+
+
+  {
+    $project: {
+      'trans.activatedDate': 0,
+      'trans.areaPath': 0,
+      'trans.iterationPath': 0,
+      'trans.createdDate': 0,
+      'trans.closedDate': 0
+    }
+  }
