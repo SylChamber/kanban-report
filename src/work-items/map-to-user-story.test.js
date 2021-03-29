@@ -94,7 +94,7 @@ describe('mapToUserStory', function () {
     })
 
     createBoardSamples().forEach(function (board) {
-      test(`copies board with ${board.name}`, function () {
+      test(`board with ${board.name}`, function () {
         const workItem = createBasicWorkItem()
         Object.assign(workItem.fields, board.data)
         const realStory = mapToUserStory(workItem)
@@ -277,6 +277,12 @@ describe('mapToUserStory', function () {
       expect(realStory.title).toEqual(workItem.fields[fieldKeys.title])
     })
 
+    test('url', () => {
+      const workItem = createBasicWorkItem()
+      const realStory = mapToUserStory(workItem)
+      expect(realStory.url).toEqual(workItem.url)
+    })
+
     test('work item type', function () {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
@@ -348,7 +354,8 @@ describe('mapToUserStory', function () {
         'System.Title': 'Some item that needs care',
         'System.AreaPath': 'Project\\Team',
         'System.State': 'New'
-      }
+      },
+      url: 'https://devops/org/proj/_apis/wit/workitems/512'
     }
   }
 

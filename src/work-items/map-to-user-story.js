@@ -33,6 +33,7 @@ const mapToPerson = require('../teams/map-to-person')
  * @property {string} [stateReason] - The reason for the state change of the story, for example 'Implementation started'.
  * @property {string[]} [tags] - Tags that are associated with the user story.
  * @property {string} title - The title of the user story.
+ * @property {string} url - The URL of the user story in the Azure DevOps API.
  * @property {string} workItemType - The type of the work item; should be 'User Story'.
  */
 
@@ -56,6 +57,7 @@ function mapToUserStory (item) {
     stateChangeDate: new Date(item.fields[fieldKeys.stateChangeDate]),
     stateReason: item.fields[fieldKeys.stateReason],
     title: item.fields[fieldKeys.title],
+    url: item.url,
     workItemType: item.fields[fieldKeys.workItemType]
   }
 
