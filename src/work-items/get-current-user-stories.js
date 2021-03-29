@@ -20,6 +20,10 @@ function createGetCurrentUserStoriesGetter (options, fetch) {
     throw new TypeError('The "options.personalAccessToken" property is not defined')
   }
 
+  if (options.url === undefined || options.url === '') {
+    options.url = 'https://dev.azure.com'
+  }
+
   if (fetch === undefined) {
     throw new ReferenceError('"fetch" is not defined')
   }
@@ -49,7 +53,7 @@ function createGetCurrentUserStoriesGetter (options, fetch) {
       throw new TypeError('The "userStoryOptions.areaPath" property is not defined')
     }
 
-    const url = `${options.url}/${options.organization}/${options.project}/_apis/wit/wiql`
+    const urlWiql = `${options.url}/${options.organization}/${options.project}/_apis/wit/wiql`
     const states = userStoryOptions.activeStates.map(s => `'${s}'`).join(', ')
     const asOf = userStoryOptions.referenceDate
       ? ` ASOF '${userStoryOptions.referenceDate?.toISOString()}'`
@@ -61,7 +65,7 @@ function createGetCurrentUserStoriesGetter (options, fetch) {
       body: JSON.stringify({ query })
     }
 
-    const response = await fetch(url, fetchOptions)
+    const response = await fetch(urlWiql, fetchOptions)
     /**
      * @type {WiqlApiResult}
      */

@@ -29,6 +29,22 @@ describe('createCurrentGetUserStoriesGetter', () => {
     expect(fn).toThrow(new ReferenceError('"fetch" is not defined'))
   })
 
+  test.each([
+    ['undefined', {}, 'https://dev.azure.com'],
+    ['empty', { url: '' }, 'https://dev.azure.com'],
+    ['provided', { url: 'https://dev' }, 'https://dev']
+  ])('provides Azure DevOps url (or not) if %s',
+    async function providesUrl (testName, input, expected) {
+      const options = { organization: 'org', personalAccessToken: 'token', project: 'proj', ...input }
+      const fetch = jest.fn().mockReturnValue(Promise.resolve({
+        json: async () => Promise.resolve({ asOf: '2020-02-20T20:20:20Z', items: [] })
+      }))
+      const userStoryOptions = { activeStates: ['Active'], areaPath: 'area' }
+      const getStories = createGetCurrentUserStoriesGetter(options, fetch)
+      await getStories(userStoryOptions)
+      expect(fetch.mock.calls[0][0]).toEqual(expect.stringContaining(expected))
+    })
+
   test('returns a function', () => {
     const options = { organization: 'org', personalAccessToken: 'token', project: 'proj' }
     const fn = createGetCurrentUserStoriesGetter(options, function () {})
