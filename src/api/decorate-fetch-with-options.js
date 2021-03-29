@@ -39,7 +39,7 @@ function decorateFetchWithAuthHeader (fetch, personalAccessToken) {
     }
     const newOptions = { ...options, headers: { ...options?.headers, ...headersToAdd } }
 
-    fetch(url, newOptions)
+    return fetch(url, newOptions)
   }
 }
 

@@ -57,4 +57,13 @@ describe('decoratedFetch', () => {
       decoratedFetch('https://example.com', options)
       expect(fetch).toHaveBeenCalledWith(expect.anything(), expectedOptions)
     })
+
+  test('returns the result from inner fetch', async () => {
+    const expected = { json: Promise.resolve({ items: [] }) }
+    const fetch = jest.fn().mockName('fetchMock').mockReturnValue(Promise.resolve(expected))
+    const token = 'token'
+    const decoratedFetch = decorateFetchWithOptions(fetch, token)
+    const real = await decoratedFetch('https://dev')
+    expect(real).toEqual(expected)
+  })
 })
