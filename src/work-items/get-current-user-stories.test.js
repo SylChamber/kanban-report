@@ -15,7 +15,7 @@ describe('createCurrentGetUserStoriesGetter', () => {
       { organization: 'org' },
       new TypeError('The "options.project" property is not defined')
     ]
-  ])('requires %s', (paramName, input, expectedError) => {
+  ])('requires %s', function requiresParameters (paramName, input, expectedError) {
     const fn = () => createGetCurrentUserStoriesGetter(input, function () {})
     expect(fn).toThrow(expectedError)
   })
