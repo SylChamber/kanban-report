@@ -1,3 +1,5 @@
+const mapToUserStory = require('./map-to-user-story')
+
 /**
  * Creates a function that gets user story details from Azure DevOps.
  * @param {{organization:string, project: string, [url]:string}} options - Options for Azure DevOps.
@@ -11,6 +13,10 @@ function createUserStoryDetailsGetter ({ organization, project, url }, fetch) {
 
   if (project === undefined) {
     throw new TypeError('The "project" property of the options is not defined')
+  }
+
+  if (url === undefined || url === '') {
+    url = 'https://dev.azure.com'
   }
 
   if (fetch === undefined) {
@@ -36,10 +42,31 @@ function createUserStoryDetailsGetter ({ organization, project, url }, fetch) {
       throw new TypeError('"ids" must not be empty')
     }
 
-    if (ids.some(id => !Number.isInteger())) {
+    if (ids.some(id => !Number.isInteger(id))) {
       const nonInt = ids.filter(id => !Number.isInteger(id)).map(id => `"${id}"`).join(', ')
       throw new TypeError(`all items in "ids" must be integers: ${nonInt}`)
     }
+
+    const urlIds = `${url}/${organization}/${project}/_apis/wit/workitemsbatch`
+    const query = {
+      $expand: 'All',
+      ids: ids
+    }
+    const options = {
+      method: 'POST',
+      body: JSON.stringify(query)
+    }
+
+    /**
+     * @type {{json:function():Promise<{count:number, value:object[]}>}}
+     */
+    const response = await fetch(urlIds, options)
+
+    /**
+     * @type {{count:number, value:{id:number, fields:object, url:string}[]}}
+     */
+    const result = await response.json()
+    return result.value.map(mapToUserStory)
   }
 }
 

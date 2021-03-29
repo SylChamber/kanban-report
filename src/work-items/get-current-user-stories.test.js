@@ -99,12 +99,10 @@ describe('getCurrentUserStories', () => {
         referenceDate: new Date('2020-02-20T20:00:00Z')
       }
       const mockedResponse = {
-        json: () => {
-          return {
-            asOf: storyOptions.referenceDate.toISOString(),
-            stories: []
-          }
-        }
+        json: () => Promise.resolve({
+          asOf: storyOptions.referenceDate.toISOString(),
+          stories: []
+        })
       }
       const expectedUrl = `${options.url}/${options.organization}/${options.project}/_apis/wit/wiql`
       const fetchSub = jest.fn().mockName('fetchSub').mockReturnValue(mockedResponse)

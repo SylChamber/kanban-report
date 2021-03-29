@@ -43,4 +43,53 @@ describe('getUserStoryDetails', () => {
     const fn = () => getUserStoryDetails(input)
     return expect(fn).rejects.toThrow(error)
   })
+
+  test('returns results from the API', async () => {
+    const mockReturn = Promise.resolve({
+      json: () => Promise.resolve({
+        count: 1,
+        value: [
+          {
+            id: 5,
+            rev: 10,
+            fields: {
+              'System.Id': 5,
+              'System.AreaPath': 'TheWay',
+              'System.BoardColumn': 'Todo',
+              'System.BoardColumnDone': false,
+              'System.Description': 'to do',
+              'System.TeamProject': 'Proj',
+              'System.State': 'New',
+              'System.CreatedBy': {
+                displayName: 'John Doe',
+                uniqueName: 'john.doe@example.com'
+              },
+              'System.CreatedDate': '2020-02-20T20:20:20Z'
+            }
+          }
+        ]
+      })
+    })
+    const expected = [{
+      acceptanceCriteria: undefined,
+      areaPath: 'TheWay',
+      board: { column: 'Todo', columnDone: false },
+      createdBy: {
+        name: 'John Doe',
+        email: 'john.doe@example.com'
+      },
+      createdDate: new Date('2020-02-20T20:20:20Z'),
+      description: 'to do',
+      id: 5,
+      project: 'Proj',
+      revision: 10,
+      state: 'New'
+    }]
+    const fetchMock = jest.fn().mockName('fetchMock').mockReturnValue(mockReturn)
+    const getUserStoryDetails = createUserStoryDetailsGetter(createOptions(), fetchMock)
+    const real = await getUserStoryDetails([5])
+    expect(real).toBeInstanceOf(Array)
+    expect(real).toHaveLength(1)
+    expect(real[0]).toEqual(expect.objectContaining(expected[0]))
+  })
 })
