@@ -38,11 +38,11 @@ function createGetCurrentUserStoriesGetter (options, fetch) {
     }
 
     if (userStoryOptions.activeStates === undefined) {
-      throw new TypeError('The "userStoryOptions.activeStates" is not defined')
+      throw new TypeError('The "userStoryOptions.activeStates" property is not defined')
     }
 
     if (userStoryOptions.activeStates.length === 0) {
-      throw new TypeError('The "userStoryOptions.activeStates" must not be empty')
+      throw new TypeError('The "userStoryOptions.activeStates" property must not be empty')
     }
 
     if (userStoryOptions.areaPath === undefined || userStoryOptions.areaPath === '') {

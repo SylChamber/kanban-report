@@ -68,8 +68,8 @@ describe('getCurrentUserStories', () => {
   })
 
   test.each([
-    ['undefined', { }, new TypeError('The "userStoryOptions.activeStates" is not defined')],
-    ['empty', { activeStates: [] }, new TypeError('The "userStoryOptions.activeStates" must not be empty')]
+    ['undefined', { }, new TypeError('The "userStoryOptions.activeStates" property is not defined')],
+    ['empty', { activeStates: [] }, new TypeError('The "userStoryOptions.activeStates" property must not be empty')]
   ])('requires active states (%s)', function requiresActiveStates (paramName, input, error) {
     const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, jest.fn())
     const fn = () => getCurrentUserStories(Object.assign(input, { areaPath: 'area51' }))
