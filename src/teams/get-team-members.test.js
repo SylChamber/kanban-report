@@ -7,31 +7,25 @@ describe('createTeamMembersGetter', function () {
   })
 
   test('requires options.organization', function () {
-    const options = { personalAccessToken: 'token', project: 'proj' }
+    const options = { project: 'proj' }
     const fn = () => createTeamMembersGetter(options, {})
     expect(fn).toThrow(new TypeError('The "options.organization" property is not defined'))
   })
 
   test('requires options.project', function () {
-    const options = { organization: 'org', personalAccessToken: 'token' }
+    const options = { organization: 'org' }
     const fn = () => createTeamMembersGetter(options, {})
     expect(fn).toThrow(new TypeError('The "options.project" property is not defined'))
   })
 
-  test('requires options.personalAccessToken', function () {
-    const options = { organization: 'org', project: 'proj' }
-    const fn = () => createTeamMembersGetter(options, {})
-    expect(fn).toThrow(new TypeError('The "options.personalAccessToken" property is not defined'))
-  })
-
   test('requires fetch', function () {
-    const options = { organization: 'org', personalAccessToken: 'token', project: 'proj' }
+    const options = { organization: 'org', project: 'proj' }
     const fn = () => createTeamMembersGetter(options)
     expect(fn).toThrow(new ReferenceError('"fetch" is not defined'))
   })
 
   test('returns a function', function () {
-    const options = { organization: 'org', personalAccessToken: 'token', project: 'proj' }
+    const options = { organization: 'org', project: 'proj' }
     const fn = createTeamMembersGetter(options, {})
     expect(fn).toBeInstanceOf(Function)
   })
@@ -182,7 +176,6 @@ describe('getTeamMembers', function () {
 
   const options = {
     organization: 'org',
-    project: 'proj',
-    personalAccessToken: 'token'
+    project: 'proj'
   }
 })

@@ -21,13 +21,13 @@ describe('createAzureDevopsClient', function () {
   })
 
   test('requires organization', function () {
-    const options = { project: 'proj', personalAccessToken: 'token', url: 'https://devops' }
+    const options = { project: 'proj', url: 'https://devops' }
     const fn = opt => createAzureDevopsClientFactory({})(options)
     expect(fn).toThrow(new TypeError('The "options.organization" property is not defined'))
   })
 
   test('requires project', function () {
-    const options = { organization: 'org', personalAccessToken: 'token', url: 'https://devops' }
+    const options = { organization: 'org', url: 'https://devops' }
     const fn = opt => createAzureDevopsClientFactory({})(options)
     expect(fn).toThrow(new TypeError('The "options.project" property is not defined'))
   })
@@ -38,7 +38,6 @@ describe('AzureDevopsClient', function () {
     const options = {
       organization: 'org',
       project: 'project',
-      personalAccessToken: 'token',
       url: 'https://devops'
     }
     const client = createAzureDevopsClientFactory(function () {})(options)
@@ -52,7 +51,6 @@ describe('AzureDevopsClient', function () {
       const options = {
         organization: process.env.AZURE_DEVOPS_ORG,
         project: process.env.AZURE_DEVOPS_PROJECT,
-        personalAccessToken: process.env.AZURE_DEVOPS_EXT_PAT,
         url: process.env.AZURE_DEVOPS_URL
       }
       const team = process.env.AZURE_DEVOPS_TEAM

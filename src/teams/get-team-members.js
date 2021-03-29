@@ -23,10 +23,6 @@ function createTeamMembersGetter (options, fetch) {
     throw new TypeError('The "options.project" property is not defined')
   }
 
-  if (options.personalAccessToken === undefined || options.personalAccessToken === '') {
-    throw new TypeError('The "options.personalAccessToken" property is not defined')
-  }
-
   if (fetch === undefined) {
     throw new ReferenceError('"fetch" is not defined')
   }

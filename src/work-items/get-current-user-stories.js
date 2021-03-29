@@ -16,10 +16,6 @@ function createGetCurrentUserStoriesGetter (options, fetch) {
     throw new TypeError('The "options.project" property is not defined')
   }
 
-  if (options.personalAccessToken === undefined || options.personalAccessToken === '') {
-    throw new TypeError('The "options.personalAccessToken" property is not defined')
-  }
-
   if (options.url === undefined || options.url === '') {
     options.url = 'https://dev.azure.com'
   }

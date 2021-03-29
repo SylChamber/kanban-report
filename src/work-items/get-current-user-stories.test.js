@@ -7,17 +7,12 @@ describe('createCurrentGetUserStoriesGetter', () => {
     ['options', undefined, new ReferenceError('"options" is not defined')],
     [
       'options.organization',
-      { personalAccessToken: 'token', project: 'proj' },
+      { project: 'proj' },
       new TypeError('The "options.organization" property is not defined')
     ],
     [
-      'options.personalAccessToken',
-      { organization: 'org', project: 'proj' },
-      new TypeError('The "options.personalAccessToken" property is not defined')
-    ],
-    [
       'options.project',
-      { organization: 'org', personalAccessToken: 'token' },
+      { organization: 'org' },
       new TypeError('The "options.project" property is not defined')
     ]
   ])('requires %s', (paramName, input, expectedError) => {
@@ -26,7 +21,7 @@ describe('createCurrentGetUserStoriesGetter', () => {
   })
 
   test('requires fetch', () => {
-    const options = { organization: 'org', personalAccessToken: 'token', project: 'proj' }
+    const options = { organization: 'org', project: 'proj' }
     const fn = () => createGetCurrentUserStoriesGetter(options, undefined)
     expect(fn).toThrow(new ReferenceError('"fetch" is not defined'))
   })
@@ -37,7 +32,7 @@ describe('createCurrentGetUserStoriesGetter', () => {
     ['provided', { url: 'https://dev' }, 'https://dev']
   ])('provides Azure DevOps url (or not) if %s',
     async function providesUrl (testName, input, expected) {
-      const options = { organization: 'org', personalAccessToken: 'token', project: 'proj', ...input }
+      const options = { organization: 'org', project: 'proj', ...input }
       const fetch = jest.fn().mockReturnValue(Promise.resolve({
         json: async () => Promise.resolve({ asOf: '2020-02-20T20:20:20Z', items: [] })
       }))
@@ -48,7 +43,7 @@ describe('createCurrentGetUserStoriesGetter', () => {
     })
 
   test('returns a function', () => {
-    const options = { organization: 'org', personalAccessToken: 'token', project: 'proj' }
+    const options = { organization: 'org', project: 'proj' }
     const fn = createGetCurrentUserStoriesGetter(options, function () {})
     expect(fn).toBeInstanceOf(Function)
   })
@@ -60,7 +55,6 @@ describe('getCurrentUserStories', () => {
    */
   const options = {
     organization: 'org',
-    personalAccessToken: 'token',
     project: 'proj',
     url: 'https://devops'
   }
@@ -200,8 +194,7 @@ describe('getCurrentUserStories', () => {
     beforeAll(() => {
       options = {
         organization: process.env.AZURE_DEVOPS_ORG,
-        project: process.env.AZURE_DEVOPS_PROJECT,
-        personalAccessToken: process.env.AZURE_DEVOPS_EXT_PAT
+        project: process.env.AZURE_DEVOPS_PROJECT
       }
       fetch = fetchDecorator(nodeFetch, process.env.AZURE_DEVOPS_EXT_PAT)
     })
