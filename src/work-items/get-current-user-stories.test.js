@@ -1,4 +1,6 @@
+const nodeFetch = require('node-fetch')
 const createGetCurrentUserStoriesGetter = require('./get-current-user-stories')
+const fetchDecorator = require('../api/decorate-fetch-with-options')
 
 describe('createCurrentGetUserStoriesGetter', () => {
   test.each([
@@ -187,6 +189,32 @@ describe('getCurrentUserStories', () => {
       const result = await getCurrentUserStories(storyOptions)
       expect(result).toHaveProperty('stories')
       expect(result.stories).toEqual(data.workItems)
+    })
+  })
+
+  // eslint-disable-next-line jest/no-disabled-tests
+  describe.skip('Azure integration', () => {
+    let options
+    let fetch
+
+    beforeAll(() => {
+      options = {
+        organization: process.env.AZURE_DEVOPS_ORG,
+        project: process.env.AZURE_DEVOPS_PROJECT,
+        personalAccessToken: process.env.AZURE_DEVOPS_EXT_PAT
+      }
+      fetch = fetchDecorator(nodeFetch, process.env.AZURE_DEVOPS_EXT_PAT)
+    })
+
+    test('can access Azure DevOps', async () => {
+      const getStories = createGetCurrentUserStoriesGetter(options, fetch)
+      const storyOptions = {
+        areaPath: options.project,
+        activeStates: ['Active', 'Validation', 'Attente'],
+        referenceDate: new Date('2021-03-26T04:00:00Z')
+      }
+      const result = await getStories(storyOptions)
+      expect(result).not.toBeNull()
     })
   })
 })
