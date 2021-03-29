@@ -23,7 +23,6 @@ function createAzureDevopsClientFactory (fetch) {
    * @throws {ReferenceError} "options" is not defined
    * @throws {TypeError} The "organization" property is not defined
    * @throws {TypeError} The "project" property is not defined
-   * @throws {TypeError} The "personalAccessToken" property is not defined
    */
   function createAzureDevopsClient (options) {
     if (options === undefined) {
@@ -36,14 +35,6 @@ function createAzureDevopsClientFactory (fetch) {
 
     if (options.project === undefined) {
       throw new TypeError('The "options.project" property is not defined')
-    }
-
-    if (options.personalAccessToken === undefined) {
-      throw new TypeError('The "options.personalAccessToken" property is not defined')
-    }
-
-    if (options.url === undefined) {
-      throw new TypeError('The "options.url" property is not defined')
     }
 
     return {
@@ -69,8 +60,7 @@ function createAzureDevopsClientFactory (fetch) {
  * @typedef {object} AzureDevopsClientOptions Options for getting an Azure DevOps REST API client.
  * @property {string} organization - Organization that hosts the data in Azure DevOps.
  * @property {string} project - Project the team is part of.
- * @property {string} personalAccessToken - Personal access token that allows access to Azure DevOps.
- * @property {string} url - The url for Azure DevOps.
+ * @property {string} [url] - The url for Azure DevOps.
  */
 
 /**

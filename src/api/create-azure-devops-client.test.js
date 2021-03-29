@@ -31,18 +31,6 @@ describe('createAzureDevopsClient', function () {
     const fn = opt => createAzureDevopsClientFactory({})(options)
     expect(fn).toThrow(new TypeError('The "options.project" property is not defined'))
   })
-
-  test('requires personal access token', function () {
-    const options = { organization: 'org', project: 'proj', url: 'https://devops' }
-    const fn = opt => createAzureDevopsClientFactory({})(options)
-    expect(fn).toThrow(new TypeError('The "options.personalAccessToken" property is not defined'))
-  })
-
-  test('requires url', () => {
-    const options = { organization: 'org', personalAccessToken: 'token', project: 'proj' }
-    const fn = opt => createAzureDevopsClientFactory({})(options)
-    expect(fn).toThrow(new TypeError('The "options.url" property is not defined'))
-  })
 })
 
 describe('AzureDevopsClient', function () {
