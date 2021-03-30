@@ -43,4 +43,97 @@ describe('getCompleteUserStories', () => {
     const fn = () => getUserStoryDetails(input)
     return expect(fn).rejects.toThrow(error)
   })
+
+  test('returns details and comments', async () => {
+    const detailsResultMock = Promise.resolve({
+      json: () => Promise.resolve({
+        count: 1,
+        value: [
+          {
+            id: 5,
+            rev: 10,
+            fields: {
+              'System.Id': 5,
+              'System.AreaPath': 'TheWay',
+              'System.BoardColumn': 'Todo',
+              'System.BoardColumnDone': false,
+              'System.Description': 'to do',
+              'System.TeamProject': 'Proj',
+              'System.Title': 'Stuff to do',
+              'System.State': 'New',
+              'System.Reason': 'New',
+              'Microsoft.VSTS.Common.StateChangeDate': '2020-02-20T20:20:20Z',
+              'System.CreatedBy': {
+                displayName: 'John Doe',
+                uniqueName: 'john.doe@example.com'
+              },
+              'System.CreatedDate': '2020-02-20T20:20:20Z',
+              'System.WorkItemType': 'User Story'
+            },
+            url: 'https://devops/workitems/5'
+          }
+        ]
+      })
+    })
+    const commentsResultMock = Promise.resolve({
+      json: () => Promise.resolve({
+        totalCount: 1,
+        count: 1,
+        comments: [
+          {
+            workItemId: 5,
+            id: 500,
+            version: 1,
+            text: 'not cool, dude!',
+            createdBy: {
+              displayName: 'John Doe',
+              uniqueName: 'john.doe@example.com'
+            },
+            createdDate: '2021-02-21T21:21:21Z',
+            url: 'https://devops/workitems/5/comments/500'
+          }
+        ]
+      })
+    })
+    const expected = {
+      acceptanceCriteria: undefined,
+      areaPath: 'TheWay',
+      board: { column: 'Todo', columnDone: false },
+      comments: [{
+        id: 500,
+        workItemId: 5,
+        version: 1,
+        text: 'not cool, dude!',
+        createdBy: {
+          name: 'John Doe',
+          email: 'john.doe@example.com'
+        },
+        createdDate: new Date('2021-02-21T21:21:21Z'),
+        url: 'https://devops/workitems/5/comments/500'
+      }],
+      createdBy: {
+        name: 'John Doe',
+        email: 'john.doe@example.com'
+      },
+      createdDate: new Date('2020-02-20T20:20:20Z'),
+      description: 'to do',
+      id: 5,
+      project: 'Proj',
+      revision: 10,
+      state: 'New',
+      stateChangeDate: new Date('2020-02-20T20:20:20Z'),
+      stateReason: 'New',
+      title: 'Stuff to do',
+      url: 'https://devops/workitems/5',
+      workItemType: 'User Story'
+    }
+    const fetchMock = jest.fn().mockName('fetchMock')
+      .mockReturnValueOnce(detailsResultMock)
+      .mockReturnValueOnce(commentsResultMock)
+    const getCompleteUserStories = createCompleteUserStoriesGetter(createOptions(), fetchMock)
+    const real = await getCompleteUserStories([5])
+    expect(real).toBeInstanceOf(Array)
+    expect(real).toHaveLength(1)
+    expect(real[0]).toEqual(expect.objectContaining(expected))
+  })
 })

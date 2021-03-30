@@ -1,3 +1,6 @@
+const createUserStoryDetailsGetter = require('./get-user-story-details')
+const createUserStoryCommentsGetter = require('./get-user-story-comments')
+
 /**
  * Creates a function that gets complete user stories for the specified ids.
  * @param {{organization:string, project: string, [url]:string}} options - Options for Azure DevOps.
@@ -20,6 +23,9 @@ function createCompleteUserStoriesGetter ({ organization, project, url }, fetch)
   if (fetch === undefined) {
     throw new ReferenceError('"fetch" is not defined')
   }
+
+  const getUserStoryDetails = createUserStoryDetailsGetter({ organization, project, url }, fetch)
+  const getUserStoryComments = createUserStoryCommentsGetter({ organization, project, url }, fetch)
 
   return getCompleteUserStories
 
@@ -45,12 +51,26 @@ function createCompleteUserStoriesGetter ({ organization, project, url }, fetch)
       const nonInt = ids.filter(id => !Number.isInteger(id)).map(id => `"${id}"`).join(', ')
       throw new TypeError(`all items in "ids" must be integers: ${nonInt}`)
     }
+
+    const details = await getUserStoryDetails(ids)
+    const promisesToAddComments = details.map(getAndAddCommentsForUserStory)
+    return await Promise.all(promisesToAddComments)
+
+    /**
+     * Maps a story to a promise to return it with its comments.
+     * @param {UserStory} story - User story for which we want to get its comments.
+     * @returns {Promise<UserStory>} A promise to return the user story with its comments.
+     */
+    async function getAndAddCommentsForUserStory (story) {
+      const comments = await getUserStoryComments(story.id)
+      return { ...story, comments: comments }
+    }
   }
 }
 
 /**
- * Represents a user story in Azure DevOps.
- * @typedef {import('./map-to-user-story').UserStory[]} UserStory
+ * @typedef {import('./map-to-user-story').UserStory} UserStory
+ * @typedef {import('./map-to-comment').Comment} Comment
  */
 
 module.exports = createCompleteUserStoriesGetter
