@@ -55,7 +55,8 @@ function createUserStoryDetailsGetter ({ organization, project, url }, fetch) {
     }
     const options = {
       method: 'POST',
-      body: JSON.stringify(query)
+      body: JSON.stringify(query),
+      headers: { 'Content-Type': 'application/json' }
     }
 
     /**

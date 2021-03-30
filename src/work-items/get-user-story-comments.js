@@ -39,7 +39,7 @@ function createUserStoryCommentsGetter ({ organization, project, url }, fetch) {
       throw new TypeError('"id" is not an integer')
     }
 
-    const urlComment = `${url}/${organization}/${project}/_apis/wit/workitems/${id}/comments`
+    const urlComment = `${url}/${organization}/${project}/_apis/wit/workitems/${id}/comments?api-version=6.0-preview`
     /**
      * @type {{json:function():Promise<{totalCount:number, count:number, comments:object[]}>}}
      */
