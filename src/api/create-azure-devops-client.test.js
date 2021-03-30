@@ -45,6 +45,13 @@ describe('AzureDevopsClient', function () {
     expect(client.getTeamMembers).toBeInstanceOf(Function)
   })
 
+  test('exposes getCurrentUserStories', () => {
+    const options = { organization: 'org', project: 'proj', url: 'https://devops' }
+    const client = createAzureDevopsClientFactory(jest.fn())(options)
+    expect(client).toHaveProperty('getCurrentUserStories')
+    expect(client.getCurrentUserStories).toBeInstanceOf(Function)
+  })
+
   // eslint-disable-next-line jest/no-disabled-tests
   describe.skip('integration with Azure', function () {
     test('client can access Azure DevOps', async function () {
