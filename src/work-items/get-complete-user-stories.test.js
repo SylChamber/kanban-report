@@ -1,3 +1,5 @@
+const nodeFetch = require('node-fetch')
+const fetchDecorator = require('../api/decorate-fetch-with-options')
 const createCompleteUserStoriesGetter = require('./get-complete-user-stories')
 
 describe('createCompleteUserStoriesGetter', () => {
@@ -135,5 +137,26 @@ describe('getCompleteUserStories', () => {
     expect(real).toBeInstanceOf(Array)
     expect(real).toHaveLength(1)
     expect(real[0]).toEqual(expect.objectContaining(expected))
+  })
+
+  // eslint-disable-next-line jest/no-disabled-tests
+  describe.skip('Azure integration', () => {
+    let options
+    let fetch
+
+    beforeAll(() => {
+      options = {
+        organization: process.env.AZURE_DEVOPS_ORG,
+        project: process.env.AZURE_DEVOPS_PROJECT
+      }
+      fetch = fetchDecorator(nodeFetch, process.env.AZURE_DEVOPS_EXT_PAT)
+    })
+
+    test('can access Azure DevOps', async () => {
+      const getStories = createCompleteUserStoriesGetter(options, fetch)
+      const ids = [1224, 1339, 1398]
+      const result = await getStories(ids)
+      expect(result).not.toBeNull()
+    })
   })
 })
