@@ -2,8 +2,9 @@
  * Creates a function that gets current user stories from Azure DevOps.
  * @param {import("../api/create-azure-devops-client").AzureDevopsClientOptions} options Options for accessing Azure DevOps data.
  * @param {import("../api/create-azure-devops-client").fetch} fetch Interface that fetches resources from the network.
+ * @returns {getCurrentUserStories} A function that gets the current user stories at the date specified.
  */
-function createGetCurrentUserStoriesGetter (options, fetch) {
+function createCurrentUserStoriesGetter (options, fetch) {
   if (options === undefined) {
     throw new ReferenceError('"options" is not defined')
   }
@@ -102,4 +103,4 @@ function createGetCurrentUserStoriesGetter (options, fetch) {
  * @property {string} url - URL of the user story in the REST API.
  */
 
-module.exports = createGetCurrentUserStoriesGetter
+module.exports = createCurrentUserStoriesGetter

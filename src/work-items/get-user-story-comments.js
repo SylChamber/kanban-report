@@ -4,7 +4,7 @@ const mapToComment = require('./map-to-comment')
  * Creates a function that gets the comments for a user story from Azure DevOps.
  * @param {{organization:string, project: string, [url]:string}} options - Options for Azure DevOps.
  * @param {import('../api/create-azure-devops-client').fetch} fetch - Interface that fetches resources from the network.
- * @returns
+ * @returns {getUserStoryComments} A function that gets comments for the specified user story.
  */
 function createUserStoryCommentsGetter ({ organization, project, url }, fetch) {
   if (organization === undefined) {
@@ -28,7 +28,7 @@ function createUserStoryCommentsGetter ({ organization, project, url }, fetch) {
   /**
    * Gets the comments for the specified user story from Azure DevOps.
    * @param {number} id - The id of the user story for which the comments are required.
-   * @returns {Promise<object[]>}
+   * @returns {Promise<Comment[]>} A promise that resolves in an array of comments for the user story.
   */
   async function getUserStoryComments (id) {
     if (id === undefined) {
@@ -51,5 +51,9 @@ function createUserStoryCommentsGetter ({ organization, project, url }, fetch) {
     return result.comments.map(mapToComment)
   }
 }
+
+/**
+ * @typedef {import('./map-to-comment').Comment} Comment
+ */
 
 module.exports = createUserStoryCommentsGetter
