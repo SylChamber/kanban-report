@@ -42,4 +42,45 @@ describe('getUserStoryComments', () => {
     const fn = () => getUserStoryComments(input)
     return expect(fn).rejects.toThrow(error)
   })
+
+  test('returns results from the API', async () => {
+    const mockReturn = Promise.resolve({
+      json: () => Promise.resolve({
+        totalCount: 1,
+        count: 1,
+        comments: [
+          {
+            workItemId: 5,
+            id: 500,
+            version: 1,
+            text: 'not cool, dude!',
+            createdBy: {
+              displayName: 'John Doe',
+              uniqueName: 'john.doe@example.com'
+            },
+            createdDate: '2021-02-21T21:21:21Z',
+            url: 'https://devops/workitems/5/comments/500'
+          }
+        ]
+      })
+    })
+    const expected = {
+      id: 500,
+      workItemId: 5,
+      version: 1,
+      text: 'not cool, dude!',
+      createdBy: {
+        name: 'John Doe',
+        email: 'john.doe@example.com'
+      },
+      createdDate: new Date('2021-02-21T21:21:21Z'),
+      url: 'https://devops/workitems/5/comments/500'
+    }
+    const fetchMock = jest.fn().mockName('fetchMock').mockReturnValue(mockReturn)
+    const getUserStoryComments = createUserStoryCommentsGetter(createOptions(), fetchMock)
+    const real = await getUserStoryComments(5)
+    expect(real).toBeInstanceOf(Array)
+    expect(real).toHaveLength(1)
+    expect(real[0]).toEqual(expect.objectContaining(expected))
+  })
 })
