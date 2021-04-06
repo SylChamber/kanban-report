@@ -1,8 +1,8 @@
 const nodeFetch = require('node-fetch')
-const createGetCurrentUserStoriesGetter = require('./get-current-user-stories')
+const createGetCurrentUserStoryIdsGetter = require('./get-current-user-story-ids')
 const fetchDecorator = require('../api/decorate-fetch-with-options')
 
-describe('createCurrentGetUserStoriesGetter', () => {
+describe('createCurrentGetUserStoryIdsGetter', () => {
   test.each([
     ['options', undefined, new ReferenceError('"options" is not defined')],
     [
@@ -16,13 +16,13 @@ describe('createCurrentGetUserStoriesGetter', () => {
       new TypeError('The "options.project" property is not defined')
     ]
   ])('requires %s', function requiresParameters (paramName, input, expectedError) {
-    const fn = () => createGetCurrentUserStoriesGetter(input, function () {})
+    const fn = () => createGetCurrentUserStoryIdsGetter(input, function () {})
     expect(fn).toThrow(expectedError)
   })
 
   test('requires fetch', () => {
     const options = { organization: 'org', project: 'proj' }
-    const fn = () => createGetCurrentUserStoriesGetter(options, undefined)
+    const fn = () => createGetCurrentUserStoryIdsGetter(options, undefined)
     expect(fn).toThrow(new ReferenceError('"fetch" is not defined'))
   })
 
@@ -37,19 +37,19 @@ describe('createCurrentGetUserStoriesGetter', () => {
         json: async () => Promise.resolve({ asOf: '2020-02-20T20:20:20Z', items: [] })
       }))
       const userStoryOptions = { activeStates: ['Active'], areaPath: 'area' }
-      const getStories = createGetCurrentUserStoriesGetter(options, fetch)
-      await getStories(userStoryOptions)
+      const getStoryIds = createGetCurrentUserStoryIdsGetter(options, fetch)
+      await getStoryIds(userStoryOptions)
       expect(fetch.mock.calls[0][0]).toEqual(expect.stringContaining(expected))
     })
 
   test('returns a function', () => {
     const options = { organization: 'org', project: 'proj' }
-    const fn = createGetCurrentUserStoriesGetter(options, function () {})
+    const fn = createGetCurrentUserStoryIdsGetter(options, function () {})
     expect(fn).toBeInstanceOf(Function)
   })
 })
 
-describe('getCurrentUserStories', () => {
+describe('getCurrentUserStoryIds', () => {
   /**
    * @type {import('../api/create-azure-devops-client').AzureDevopsClientOptions}
    */
@@ -64,8 +64,8 @@ describe('getCurrentUserStories', () => {
   })
 
   test('requires user story options', async () => {
-    const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, jest.fn())
-    const fn = async () => await getCurrentUserStories()
+    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, jest.fn())
+    const fn = async () => await getCurrentUserStoryIds()
     return expect(fn).rejects.toThrow(new ReferenceError('"userStoryOptions" is not defined'))
   })
 
@@ -74,8 +74,8 @@ describe('getCurrentUserStories', () => {
     ['undefined', { areaPath: undefined }],
     ['empty string', { areaPath: '' }]
   ])('requires area path (%s)', function requiresAreaPath (paramName, input) {
-    const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, jest.fn())
-    const fn = () => getCurrentUserStories(Object.assign(input, { activeStates: ['Active'] }))
+    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, jest.fn())
+    const fn = () => getCurrentUserStoryIds(Object.assign(input, { activeStates: ['Active'] }))
     return expect(fn).rejects.toThrow(new TypeError('The "userStoryOptions.areaPath" property is not defined'))
   })
 
@@ -83,15 +83,15 @@ describe('getCurrentUserStories', () => {
     ['undefined', { }, new TypeError('The "userStoryOptions.activeStates" property is not defined')],
     ['empty', { activeStates: [] }, new TypeError('The "userStoryOptions.activeStates" property must not be empty')]
   ])('requires active states (%s)', function requiresActiveStates (paramName, input, error) {
-    const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, jest.fn())
-    const fn = () => getCurrentUserStories(Object.assign(input, { areaPath: 'area51' }))
+    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, jest.fn())
+    const fn = () => getCurrentUserStoryIds(Object.assign(input, { areaPath: 'area51' }))
     return expect(fn).rejects.toThrow(error)
   })
 
   describe('calls fetch', () => {
     test('with right url', async () => {
       /**
-       * @type {import('./get-current-user-stories').UserStoryOptions}
+       * @type {import('./get-current-user-story-ids').UserStoryOptions}
        */
       const storyOptions = {
         activeStates: ['Active', 'Resolved'],
@@ -106,8 +106,8 @@ describe('getCurrentUserStories', () => {
       }
       const expectedUrl = `${options.url}/${options.organization}/${options.project}/_apis/wit/wiql`
       const fetchSub = jest.fn().mockName('fetchSub').mockReturnValue(mockedResponse)
-      const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, fetchSub)
-      await getCurrentUserStories(storyOptions)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, fetchSub)
+      await getCurrentUserStoryIds(storyOptions)
       expect(fetchSub).toHaveBeenCalledWith(expectedUrl, expect.anything())
     })
 
@@ -116,7 +116,7 @@ describe('getCurrentUserStories', () => {
       ['without reference date', undefined]
     ])('with right options (%s)', async function withRightOptions (testName, refDate) {
       /**
-       * @type {import('./get-current-user-stories').UserStoryOptions}
+       * @type {import('./get-current-user-story-ids').UserStoryOptions}
        */
       const storyOptions = {
         activeStates: ['Active', 'Resolved'],
@@ -144,8 +144,8 @@ describe('getCurrentUserStories', () => {
         method: 'POST'
       }
       const fetchSub = jest.fn().mockName('fetchSub').mockReturnValue(mockedResponse)
-      const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, fetchSub)
-      await getCurrentUserStories(storyOptions)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, fetchSub)
+      await getCurrentUserStoryIds(storyOptions)
       expect(fetchSub).toHaveBeenCalledWith(expect.anything(), expectedOptions)
     })
   })
@@ -164,8 +164,8 @@ describe('getCurrentUserStories', () => {
       }
       const response = { json: () => data }
       const fetch = jest.fn().mockName('fetchMock').mockReturnValue(response)
-      const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, fetch)
-      const result = await getCurrentUserStories(storyOptions)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, fetch)
+      const result = await getCurrentUserStoryIds(storyOptions)
       expect(result).toHaveProperty('referenceDate')
       expect(result.referenceDate).toEqual(storyOptions.referenceDate)
     })
@@ -177,8 +177,8 @@ describe('getCurrentUserStories', () => {
       }
       const response = { json: () => data }
       const fetch = jest.fn().mockName('fetchMock').mockReturnValue(response)
-      const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, fetch)
-      const result = await getCurrentUserStories(storyOptions)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, fetch)
+      const result = await getCurrentUserStoryIds(storyOptions)
       expect(result).toHaveProperty('stories')
       expect(result.stories).toEqual(data.workItems)
     })
@@ -198,13 +198,13 @@ describe('getCurrentUserStories', () => {
     })
 
     test('can access Azure DevOps', async () => {
-      const getStories = createGetCurrentUserStoriesGetter(options, fetch)
+      const getStoryIds = createGetCurrentUserStoryIdsGetter(options, fetch)
       const storyOptions = {
         areaPath: options.project,
         activeStates: ['Active', 'Validation', 'Attente'],
         referenceDate: new Date('2021-03-26T04:00:00Z')
       }
-      const result = await getStories(storyOptions)
+      const result = await getStoryIds(storyOptions)
       expect(result).not.toBeNull()
     })
   })
@@ -212,6 +212,6 @@ describe('getCurrentUserStories', () => {
 
 /**
  * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
- * @typedef {import('./get-current-user-stories').UserStoryOptions} UserStoryOptions
- * @typedef {import('./get-current-user-stories').UserStoriesResult} UserStoriesResult
+ * @typedef {import('./get-current-user-story-ids').UserStoryOptions} UserStoryOptions
+ * @typedef {import('./get-current-user-story-ids').UserStoriesResult} UserStoriesResult
  */

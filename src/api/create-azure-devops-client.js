@@ -1,5 +1,5 @@
 const createTeamMembersGetter = require('../teams/get-team-members')
-const createCurrentUserStoriesGetter = require('../work-items/get-current-user-stories')
+const createCurrentUserStoryIdsGetter = require('../work-items/get-current-user-story-ids')
 const createCompleteUserStoriesGetter = require('../work-items/get-complete-user-stories')
 
 /**
@@ -45,7 +45,7 @@ function createAzureDevopsClientFactory (fetch) {
     }
 
     async function getCurrentUserStories (storyOptions) {
-      const getIds = createCurrentUserStoriesGetter(options, fetch)
+      const getIds = createCurrentUserStoryIdsGetter(options, fetch)
       const getStories = createCompleteUserStoriesGetter(options, fetch)
       const currentStories = await getIds(storyOptions)
       const ids = currentStories.stories.map(s => s.id)
@@ -61,8 +61,8 @@ function createAzureDevopsClientFactory (fetch) {
  * @typedef {import('node-fetch').RequestInfo} RequestInfo
  * @typedef {import('node-fetch').RequestInit} RequestInit
  * @typedef {import('node-fetch').Response} Response
- * @typedef {import('../work-items/get-current-user-stories').UserStoryOptions} UserStoryOptions
- * @typedef {import('../work-items/get-current-user-stories').UserStoryReference} UserStoryReference
+ * @typedef {import('../work-items/get-current-user-story-ids').UserStoryOptions} UserStoryOptions
+ * @typedef {import('../work-items/get-current-user-story-ids').UserStoryReference} UserStoryReference
  * @typedef {import('../work-items/map-to-user-story').UserStory} UserStory
  */
 

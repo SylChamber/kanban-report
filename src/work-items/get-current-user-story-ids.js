@@ -1,10 +1,10 @@
 /**
- * Creates a function that gets current user stories from Azure DevOps.
+ * Creates a function that gets current user story Ids from Azure DevOps.
  * @param {import("../api/create-azure-devops-client").AzureDevopsClientOptions} options Options for accessing Azure DevOps data.
  * @param {import("../api/create-azure-devops-client").fetch} fetch Interface that fetches resources from the network.
- * @returns {getCurrentUserStories} A function that gets the current user stories at the date specified.
+ * @returns {getCurrentUserStories} A function that gets the current user story ids at the date specified.
  */
-function createCurrentUserStoriesGetter (options, fetch) {
+function createCurrentUserStoryIdsGetter (options, fetch) {
   if (options === undefined) {
     throw new ReferenceError('"options" is not defined')
   }
@@ -25,15 +25,15 @@ function createCurrentUserStoriesGetter (options, fetch) {
     throw new ReferenceError('"fetch" is not defined')
   }
 
-  return getCurrentUserStories
+  return getCurrentUserStoryIds
 
   /**
- * Gets the current user stories at the reference date specified in the options,
+ * Gets the current user story Ids at the reference date specified in the options,
  * e.g. the active stories and the stories closed during the reference date.
  * @param {UserStoryOptions} userStoryOptions - Options for getting user stories.
- * @returns {Promise<UserStoriesResult>} A promise that resolves in a result of user stories that were current at the specified reference date.
+ * @returns {Promise<UserStoriesResult>} A promise that resolves in a result of user story Ids that were current at the specified reference date.
  */
-  async function getCurrentUserStories (userStoryOptions) {
+  async function getCurrentUserStoryIds (userStoryOptions) {
     if (userStoryOptions === undefined) {
       throw new ReferenceError('"userStoryOptions" is not defined')
     }
@@ -103,4 +103,4 @@ function createCurrentUserStoriesGetter (options, fetch) {
  * @property {string} url - URL of the user story in the REST API.
  */
 
-module.exports = createCurrentUserStoriesGetter
+module.exports = createCurrentUserStoryIdsGetter
