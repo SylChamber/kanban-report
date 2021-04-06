@@ -5,7 +5,8 @@
     "description": "Supplies methods for generating a report on Kanban activity in Azure DevOps.",
     "main": "index.js",
     "scripts": {
-        "test": "jest"
+        "test": "jest --config=jest-full.config.js",
+        "watch": "jest --config=jest-full.config.js --watchAll"
     },
     "keywords": [
         "azure devops",

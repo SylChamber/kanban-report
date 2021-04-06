@@ -18,7 +18,7 @@ module.exports = {
 
   // Indicates whether the coverage information should be collected while executing the test
   // collectCoverage: false,
-  collectCoverage: false,
+  collectCoverage: true,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   // collectCoverageFrom: undefined,
@@ -107,7 +107,11 @@ module.exports = {
   // Use this configuration option to add custom reporters to Jest
   // reporters: undefined,
   reporters: [
-    'default'
+    'default',
+    ['jest-html-reporters', {
+      filename: 'test-report.html',
+      pageTitle: 'KanbanReport Unit Test Report'
+    }]
   ],
 
   // Automatically reset mock state between every test
