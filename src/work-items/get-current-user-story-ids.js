@@ -2,7 +2,7 @@
  * Creates a function that gets current user story Ids from Azure DevOps.
  * @param {import("../api/create-azure-devops-client").AzureDevopsClientOptions} options Options for accessing Azure DevOps data.
  * @param {import("../api/create-azure-devops-client").fetch} fetch Interface that fetches resources from the network.
- * @returns {getCurrentUserStories} A function that gets the current user story ids at the date specified.
+ * @returns {getCurrentUserStoryIds} A function that gets the current user story ids at the date specified.
  */
 function createCurrentUserStoryIdsGetter (options, fetch) {
   if (options === undefined) {
