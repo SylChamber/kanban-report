@@ -31,7 +31,7 @@ function createGetCurrentUserStoriesGetter ({ organization, project }, fetch) {
    * @param {string[]} storyOptions.activeStates - The states to check for active user stories.
    * @param {string} storyOptions.areaPath - The area path under which the user stories are categorized.
    * @param {Date} storyOptions.referenceDate - The reference date at which the current (at the time) user stories are required.
-   * @returns {Promise<{referenceDate:Date, stories:UserStory[]}>} A promise that resolves in an array of user stories and the reference date at which they were current.
+   * @returns {Promise<UserStoriesResult>} A promise that resolves in an array of user stories and the reference date at which they were current.
    */
   async function getCurrentUserStories ({ activeStates, areaPath, referenceDate }) {
     if (areaPath === undefined) {
@@ -68,8 +68,15 @@ function createGetCurrentUserStoriesGetter ({ organization, project }, fetch) {
  * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
  * @typedef {import('../api/create-azure-devops-client').fetch} fetch
  * @typedef {import('./get-current-user-story-ids').UserStoryOptions} UserStoryOptions
- * @typedef {import('./get-current-user-story-ids').UserStoriesResult} UserStoriesResult
+ * @typedef {import('./get-current-user-story-ids').UserStoryReferencesResult} UserStoryReferencesResult
  * @typedef {import('./get-complete-user-stories').UserStory} UserStory
+ */
+
+/**
+ * Result of a a query on current user stories.
+ * @typedef {object} UserStoriesResult
+ * @property {Date} referenceDate - The reference date at which the user stories were current.
+ * @property {UserStory[]} stories - The user stories returned by the query.
  */
 
 module.exports = createGetCurrentUserStoriesGetter

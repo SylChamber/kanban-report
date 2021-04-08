@@ -31,7 +31,7 @@ function createCurrentUserStoryIdsGetter (options, fetch) {
  * Gets the current user story Ids at the reference date specified in the options,
  * e.g. the active stories and the stories closed during the reference date.
  * @param {UserStoryOptions} userStoryOptions - Options for getting user stories.
- * @returns {Promise<UserStoriesResult>} A promise that resolves in a result of user story Ids that were current at the specified reference date.
+ * @returns {Promise<UserStoryReferencesResult>} A promise that resolves in a result of user story Ids that were current at the specified reference date.
  */
   async function getCurrentUserStoryIds (userStoryOptions) {
     if (userStoryOptions === undefined) {
@@ -90,8 +90,8 @@ function createCurrentUserStoryIdsGetter (options, fetch) {
  */
 
 /**
- * Result of a query on current user stories.
- * @typedef {object} UserStoriesResult
+ * Result of a query on current user story references.
+ * @typedef {object} UserStoryReferencesResult
  * @property {Date} referenceDate - The reference date at which the user stories were current.
  * @property {UserStoryReference[]} stories - The user story references returned by the query.
  */
