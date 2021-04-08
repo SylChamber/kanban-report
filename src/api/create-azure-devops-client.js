@@ -1,6 +1,5 @@
 const createTeamMembersGetter = require('../teams/get-team-members')
-const createCurrentUserStoryIdsGetter = require('../work-items/get-current-user-story-ids')
-const createCompleteUserStoriesGetter = require('../work-items/get-complete-user-stories')
+const createGetCurrentUserStoriesGetter = require('../work-items/get-current-user-stories')
 
 /**
  * @module api/createAzureDevopsClientFactory
@@ -41,16 +40,7 @@ function createAzureDevopsClientFactory (fetch) {
 
     return {
       getTeamMembers: createTeamMembersGetter(options, fetch),
-      getCurrentUserStories
-    }
-
-    async function getCurrentUserStories (storyOptions) {
-      const getIds = createCurrentUserStoryIdsGetter(options, fetch)
-      const getStories = createCompleteUserStoriesGetter(options, fetch)
-      const currentStories = await getIds(storyOptions)
-      const ids = currentStories.stories.map(s => s.id)
-      const stories = await getStories(ids)
-      return stories
+      getCurrentUserStories: createGetCurrentUserStoriesGetter(options, fetch)
     }
   }
 

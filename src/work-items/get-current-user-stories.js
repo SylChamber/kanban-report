@@ -1,4 +1,5 @@
 const createGetCurrentStoryIdsGetter = require('./get-current-user-story-ids')
+const createGetCompleteUserStoriesGetter = require('./get-complete-user-stories')
 
 /**
  * Creates a function that gets current user stories from Azure DevOps.
@@ -18,7 +19,9 @@ function createGetCurrentUserStoriesGetter ({ organization, project }, fetch) {
     throw new ReferenceError('"fetch" is not defined.')
   }
 
-  const getCurrentStoryIds = createGetCurrentStoryIdsGetter({ organization, project }, fetch)
+  const options = { organization, project }
+  const getCurrentStoryIds = createGetCurrentStoryIdsGetter(options, fetch)
+  const getCompleteUserStories = createGetCompleteUserStoriesGetter(options, fetch)
 
   return getCurrentUserStories
 
@@ -28,6 +31,7 @@ function createGetCurrentUserStoriesGetter ({ organization, project }, fetch) {
    * @param {string[]} storyOptions.activeStates - The states to check for active user stories.
    * @param {string} storyOptions.areaPath - The area path under which the user stories are categorized.
    * @param {Date} storyOptions.referenceDate - The reference date at which the current (at the time) user stories are required.
+   * @returns {Promise<{referenceDate:Date, stories:UserStory[]}>} A promise that resolves in an array of user stories and the reference date at which they were current.
    */
   async function getCurrentUserStories ({ activeStates, areaPath, referenceDate }) {
     if (areaPath === undefined) {
@@ -46,8 +50,17 @@ function createGetCurrentUserStoriesGetter ({ organization, project }, fetch) {
       throw new TypeError('The "storyOptions.referenceDate" property is not a valid date.')
     }
 
-    const ids = await getCurrentStoryIds({ activeStates, areaPath, referenceDate })
-    return ids
+    const idsResult = await getCurrentStoryIds({ activeStates, areaPath, referenceDate })
+    const partialResult = { referenceDate: idsResult.referenceDate }
+
+    if (idsResult.stories.length === 0) {
+      return { ...partialResult, stories: [] }
+    }
+
+    const ids = idsResult.stories.map(s => s.id)
+    const stories = await getCompleteUserStories(ids)
+
+    return { ...partialResult, stories }
   }
 }
 
@@ -55,6 +68,8 @@ function createGetCurrentUserStoriesGetter ({ organization, project }, fetch) {
  * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
  * @typedef {import('../api/create-azure-devops-client').fetch} fetch
  * @typedef {import('./get-current-user-story-ids').UserStoryOptions} UserStoryOptions
+ * @typedef {import('./get-current-user-story-ids').UserStoriesResult} UserStoriesResult
+ * @typedef {import('./get-complete-user-stories').UserStory} UserStory
  */
 
 module.exports = createGetCurrentUserStoriesGetter

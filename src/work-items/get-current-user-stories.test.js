@@ -69,9 +69,8 @@ describe('getCurrentUserStories', () => {
     }
 
     test('reference date', async () => {
-      const data = { asOf: storyOptions.referenceDate.toISOString(), workItems: [] }
-      const response = { json: async () => data }
-      const fetch = jest.fn().mockName('fetchMock').mockResolvedValueOnce(response)
+      const idsData = { asOf: storyOptions.referenceDate.toISOString(), workItems: [] }
+      const fetch = jest.fn().mockName('fetchMock').mockResolvedValueOnce({ json: async () => idsData })
       const getStories = createGetCurrentUserStoriesGetter(options, fetch)
       const result = await getStories(storyOptions)
       expect(result).toHaveProperty('referenceDate')
@@ -96,13 +95,18 @@ describe('getCurrentUserStories', () => {
               'System.BoardColumnDone': false,
               'System.Description': 'to do',
               'System.TeamProject': 'Proj',
+              'System.Title': 'Stuff to do',
               'System.State': 'New',
+              'System.Reason': 'New',
+              'Microsoft.VSTS.Common.StateChangeDate': '2020-02-20T20:20:20Z',
               'System.CreatedBy': {
                 displayName: 'John Doe',
                 uniqueName: 'john.doe@example.com'
               },
-              'System.CreatedDate': '2020-02-20T20:20:20Z'
-            }
+              'System.CreatedDate': '2020-02-20T20:20:20Z',
+              'System.WorkItemType': 'User Story'
+            },
+            url: 'https://devops/workitems/5'
           }
         ]
       }
