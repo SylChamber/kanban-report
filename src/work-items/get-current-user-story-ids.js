@@ -55,7 +55,7 @@ function createCurrentUserStoryIdsGetter (options, fetch) {
     const asOf = userStoryOptions.referenceDate
       ? ` ASOF '${userStoryOptions.referenceDate?.toISOString()}'`
       : ''
-    const query = `Select Id from WorkItems where [Work Item Type] = 'User Story' and [Area Path] under '${userStoryOptions.areaPath}' and (State in (${states}) or (State = 'Closed' and [Closed Date] >= @Today - 1)) order by [Changed Date] DESC${asOf}`
+    const query = `Select Id from WorkItems where [Work Item Type] = 'User Story' and [Area Path] under '${userStoryOptions.areaPath}' and (State in (${states}) or (State = 'Closed' and [Closed Date] >= @Today)) order by [Changed Date] DESC${asOf}`
     const fetchOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
