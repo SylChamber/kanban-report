@@ -135,7 +135,7 @@ describe('getCurrentUserStoryIds', () => {
       const asOf = refDate
         ? ` ASOF '${storyOptions.referenceDate.toISOString()}'`
         : ''
-      const expectedQuery = `Select Id from WorkItems where [Work Item Type] = 'User Story' and [Area Path] under '${storyOptions.areaPath}' and (State in (${statesString}) or (State = 'Closed' and [Closed Date] >= @Today - 1)) order by [Changed Date] DESC${asOf}`
+      const expectedQuery = `Select Id from WorkItems where [Work Item Type] = 'User Story' and [Area Path] under '${storyOptions.areaPath}' and (State in (${statesString}) or (State = 'Closed' and [Closed Date] >= @Today)) order by [Changed Date] DESC${asOf}`
       const expectedOptions = {
         body: JSON.stringify({ query: expectedQuery }),
         headers: {
