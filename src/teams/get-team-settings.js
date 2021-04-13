@@ -45,13 +45,13 @@ function createGetTeamSettingsGetter ({ organization, project, url }, fetch) {
       throw new TypeError('"team" is empty.')
     }
 
-    const settingsUrl = `${url}/${organization}/${project}/${team}/_apis/work/backlogconfiguration`
+    const backlogConfigUrl = `${url}/${organization}/${project}/${team}/_apis/work/backlogconfiguration`
+    const teamFieldValuesUrl = `${url}/${organization}/${project}/${team}/_apis/work/teamsettings/teamfieldvalues`
     /**
      * @type {{json:function():Promise<BacklogConfiguration>}}
      */
-    const response = await fetch(settingsUrl)
-    const result = await response.json()
-
+    const backlogConfigResponse = await fetch(backlogConfigUrl)
+    const backlogConfig = await backlogConfigResponse.json()
     /**
      * @param {MappedState} mapping
      * @returns {boolean}
@@ -60,20 +60,34 @@ function createGetTeamSettingsGetter ({ organization, project, url }, fetch) {
     /**
      * @type {[state:string, category:string][]}
      */
-    const stateEntries = Object.entries(result.workItemTypeMappedStates.filter(isUserStoryMap)[0].states)
+    const stateEntries = Object.entries(backlogConfig.workItemTypeMappedStates.filter(isUserStoryMap)[0].states)
     const isInProgress = ([state, category]) => category === 'InProgress'
-
     /**
      * @param {MappedState} mappedState
      * @returns {string}
      */
     const toState = ([state, category]) => state
-
     /**
      * @type {string[]}
      */
     const inProgressStates = stateEntries.filter(isInProgress).map(toState)
-    return { inProgressStates }
+
+    const teamFieldValuesResponse = await fetch(teamFieldValuesUrl)
+    /**
+     * @type {TeamFieldValues}
+     */
+    const teamFieldValues = await teamFieldValuesResponse.json()
+    /**
+     * @param {{value:string}} teamFieldValue
+     * @returns {string}
+     */
+    const toArea = teamFieldValue => teamFieldValue.value
+    /**
+     * @type {string[]}
+     */
+    const areas = teamFieldValues.values.map(toArea)
+
+    return { areas, inProgressStates }
   }
 }
 
@@ -91,6 +105,12 @@ function createGetTeamSettingsGetter ({ organization, project, url }, fetch) {
 /**
  * @typedef {object} BacklogConfiguration
  * @property {MappedState[]} workItemTypeMappedStates
+ */
+
+/**
+ * @typedef {object} TeamFieldValues
+ * @property {string} defaultValue
+ * @property {{value:string}[]} values
  */
 
 /**

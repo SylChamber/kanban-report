@@ -41,7 +41,7 @@ describe('getTeamSettings', () => {
     })
   })
 
-  test('returns in progress states', async () => {
+  test('returns "in progress" states', async () => {
     const backlogConfig = {
       workItemTypeMappedStates: [
         {
@@ -63,8 +63,30 @@ describe('getTeamSettings', () => {
         }
       ]
     }
+    const teamFieldValues = { defaultValue: 'Project', values: [{ value: 'Project' }] }
     const expected = { inProgressStates: ['Active', 'Resolved'] }
-    const fetchMock = jest.fn().mockName('fetchMock').mockResolvedValueOnce({ json: async () => backlogConfig })
+    const fetchMock = jest.fn().mockName('fetchMock')
+      .mockResolvedValueOnce({ json: async () => backlogConfig })
+      .mockResolvedValueOnce({ json: async () => teamFieldValues })
+    const getTeamSettings = createGetTeamSettingsGetter(options, fetchMock)
+    const actual = await getTeamSettings('team')
+    expect(actual).toEqual(expect.objectContaining(expected))
+  })
+
+  test('returns areas', async () => {
+    const backlogConfig = {
+      workItemTypeMappedStates: [
+        { workItemTypeName: 'User Story', states: { New: 'Proposed', Active: 'InProgress', Closed: 'Completed' } }
+      ]
+    }
+    const teamFieldValues = {
+      defaultValue: 'Project\\Team',
+      values: [{ value: 'Project\\Team' }, { value: 'Project\\Team\\Analysis' }, { value: 'Project\\Team\\Dev' }]
+    }
+    const expected = { areas: ['Project\\Team', 'Project\\Team\\Analysis', 'Project\\Team\\Dev'] }
+    const fetchMock = jest.fn().mockName('fetchMock')
+      .mockResolvedValueOnce({ json: async () => backlogConfig })
+      .mockResolvedValueOnce({ json: async () => teamFieldValues })
     const getTeamSettings = createGetTeamSettingsGetter(options, fetchMock)
     const actual = await getTeamSettings('team')
     expect(actual).toEqual(expect.objectContaining(expected))
