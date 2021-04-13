@@ -65,7 +65,8 @@ function createAzureDevopsClientFactory (fetch) {
  * @typedef {object} AzureDevopsClientOptions Options for getting an Azure DevOps REST API client.
  * @property {string} organization - Organization that hosts the data in Azure DevOps.
  * @property {string} project - Project the team is part of.
- * @property {string} [url] - The url for Azure DevOps.
+ * @property {fetch} fetch - Interface that fetches resources from the network.
+ * @property {string} [url] - The url for Azure DevOps; the Azure DevOps services URL will be used by default.
  */
 
 /**
