@@ -1,27 +1,13 @@
 const mapToComment = require('./map-to-comment')
+const validateOptions = require('../api/validate-options')
 
 /**
  * Creates a function that gets the comments for a user story from Azure DevOps.
  * @param {{organization:string, project: string, [url]:string}} options - Options for Azure DevOps.
- * @param {import('../api/create-azure-devops-client').fetch} fetch - Interface that fetches resources from the network.
  * @returns {getUserStoryComments} A function that gets comments for the specified user story.
  */
-function createUserStoryCommentsGetter ({ organization, project, url }, fetch) {
-  if (organization === undefined) {
-    throw new TypeError('The "organization" property of the options is not defined')
-  }
-
-  if (project === undefined) {
-    throw new TypeError('The "project" property of the options is not defined')
-  }
-
-  if (url === undefined || url === '') {
-    url = 'https://dev.azure.com'
-  }
-
-  if (fetch === undefined) {
-    throw new ReferenceError('"fetch" is not defined')
-  }
+function createUserStoryCommentsGetter (options) {
+  const { organization, project, url, fetch } = validateOptions(options)
 
   return getUserStoryComments
 

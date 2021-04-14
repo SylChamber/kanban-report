@@ -2,33 +2,24 @@ const createGetCurrentUserStoriesGetter = require('./get-current-user-stories')
 
 describe('createGetCurrentUserStoriesGetter', () => {
   [
-    ['options', undefined, new ReferenceError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
-    [
-      'options.organization',
-      { project: 'proj' },
-      new TypeError('The "options.organization" property is not defined.')
-    ],
-    [
-      'options.project',
-      { organization: 'org' },
-      new TypeError('The "options.project" property is not defined.')
-    ]
+    ['options (undefined)', undefined, new ReferenceError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
+    ['organization (undefined)', { project: 'proj' }, new TypeError('The "organization" property is not defined.')],
+    ['organization (empty)', { organization: '', project: 'proj' }, new TypeError('The "organization" property is empty.')],
+    ['project (undefined)', { organization: 'org' }, new TypeError('The "project" property is not defined.')],
+    ['project (empty)', { organization: 'org', project: '' }, new TypeError('The "project" property is empty.')],
+    ['fetch (undefined)', { organization: 'org', project: 'proj' }, new TypeError('The "fetch" property is not defined.')],
+    ['fetch (not a function)', { organization: 'org', project: 'proj', fetch: {} }, new TypeError('The "fetch" property is not a function.')],
+    ['url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')]
   ].forEach(([testName, input, error]) => {
     test(`requires ${testName}`, () => {
-      const fn = () => createGetCurrentUserStoriesGetter(input, jest.fn())
+      const fn = () => createGetCurrentUserStoriesGetter(input)
       expect(fn).toThrow(error)
     })
   })
 
-  test('requires fetch', () => {
-    const options = { organization: 'org', project: 'proj' }
-    const fn = () => createGetCurrentUserStoriesGetter(options, undefined)
-    expect(fn).toThrow(new ReferenceError('"fetch" is not defined.'))
-  })
-
   test('returns a function', () => {
-    const options = { organization: 'org', project: 'proj' }
-    const fn = createGetCurrentUserStoriesGetter(options, jest.fn())
+    const options = { organization: 'org', project: 'proj', fetch: jest.fn() }
+    const fn = createGetCurrentUserStoriesGetter(options)
     expect(fn).toBeInstanceOf(Function)
   })
 })
@@ -40,6 +31,7 @@ describe('getCurrentUserStories', () => {
   const options = {
     organization: 'org',
     project: 'proj',
+    fetch: jest.fn().mockName('jestStub'),
     url: 'https://devops'
   }
 
@@ -55,7 +47,7 @@ describe('getCurrentUserStories', () => {
     ['referenceDate (invalid)', { activeStates: ['Active'], areaPath: 'Team', referenceDate: new Date('invalid') }, new TypeError('The "storyOptions.referenceDate" property is not a valid date.')]
   ].forEach(([testName, input, error]) => {
     test(`requires ${testName}`, async function requiresParameter () {
-      const getCurrentUserStories = createGetCurrentUserStoriesGetter(options, jest.fn())
+      const getCurrentUserStories = createGetCurrentUserStoriesGetter(options)
       const fn = async () => await getCurrentUserStories(input)
       return expect(fn).rejects.toThrow(error)
     })
@@ -71,7 +63,7 @@ describe('getCurrentUserStories', () => {
     test('reference date', async () => {
       const idsData = { asOf: storyOptions.referenceDate.toISOString(), workItems: [] }
       const fetch = jest.fn().mockName('fetchMock').mockResolvedValueOnce({ json: async () => idsData })
-      const getStories = createGetCurrentUserStoriesGetter(options, fetch)
+      const getStories = createGetCurrentUserStoriesGetter({ ...options, fetch })
       const result = await getStories(storyOptions)
       expect(result).toHaveProperty('referenceDate')
       expect(result.referenceDate).toEqual(storyOptions.referenceDate)
@@ -167,7 +159,7 @@ describe('getCurrentUserStories', () => {
           workItemType: 'User Story'
         }]
       }
-      const getStories = createGetCurrentUserStoriesGetter(options, fetch)
+      const getStories = createGetCurrentUserStoriesGetter({ ...options, fetch })
       const result = await getStories(storyOptions)
       expect(result).toHaveProperty('stories')
       expect(result.stories).toBeInstanceOf(Array)

@@ -1,50 +1,19 @@
 const createTeamMembersGetter = require('../teams/get-team-members')
 const createGetCurrentUserStoriesGetter = require('../work-items/get-current-user-stories')
+const validateOptions = require('./validate-options')
 
 /**
- * @module api/createAzureDevopsClientFactory
- */
-
-/**
- * Creates a function that creates a client for the Azure DevOps REST API.
- * @param {fetch} fetch Interface that fetches resources from the network.
- * @returns {CreateAzureDevopsClient} A function that creates a client that permits access to Azure DevOps data.
- * @throws {ReferenceError} "fetch" is not defined
- */
-function createAzureDevopsClientFactory (fetch) {
-  // fetch is injected because it makes it simpler to mock in tests without a mocking framework.
-  if (fetch === undefined) {
-    throw new ReferenceError('"fetch" is not defined')
-  }
-
-  /**
    * Creates a client for the Azure DevOps REST API.
    * @param {AzureDevopsClientOptions} options Options for getting an Azure DevOps REST API client.
    * @returns {AzureDevopsClient} Client for the Azure DevOps REST API.
-   * @throws {ReferenceError} "options" is not defined
-   * @throws {TypeError} The "organization" property is not defined
-   * @throws {TypeError} The "project" property is not defined
    */
-  function createAzureDevopsClient (options) {
-    if (options === undefined) {
-      throw new ReferenceError('"options" is not defined')
-    }
+function createAzureDevopsClient (options) {
+  options = validateOptions(options)
 
-    if (options.organization === undefined) {
-      throw new TypeError('The "options.organization" property is not defined')
-    }
-
-    if (options.project === undefined) {
-      throw new TypeError('The "options.project" property is not defined')
-    }
-
-    return {
-      getTeamMembers: createTeamMembersGetter(options, fetch),
-      getCurrentUserStories: createGetCurrentUserStoriesGetter(options, fetch)
-    }
+  return {
+    getTeamMembers: createTeamMembersGetter(options),
+    getCurrentUserStories: createGetCurrentUserStoriesGetter(options)
   }
-
-  return createAzureDevopsClient
 }
 
 /**
@@ -79,4 +48,4 @@ function createAzureDevopsClientFactory (fetch) {
  * @property {function(string): Promise<Person[]>} getTeamMembers Gets the members for the specified team.
  */
 
-module.exports = createAzureDevopsClientFactory
+module.exports = createAzureDevopsClient

@@ -3,31 +3,31 @@ const fetchDecorator = require('../api/decorate-fetch-with-options')
 const createCompleteUserStoriesGetter = require('./get-complete-user-stories')
 
 describe('createCompleteUserStoriesGetter', () => {
-  test.each([
-    ['options', undefined, new TypeError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
-    ['options.organization', { project: 'proj' }, new TypeError('The "organization" property of the options is not defined')],
-    ['options.project', { organization: 'org' }, new TypeError('The "project" property of the options is not defined')]
-  ])('requires %s', function requiresParameters (testName, input, error) {
-    const fn = () => createCompleteUserStoriesGetter(input)
-    expect(fn).toThrow(error)
-  })
-
-  test('requires fetch', () => {
-    const options = createOptions()
-    const fn = () => createCompleteUserStoriesGetter(options, undefined)
-    expect(fn).toThrow(new ReferenceError('"fetch" is not defined'))
+  [
+    ['options (undefined)', undefined, new ReferenceError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
+    ['organization (undefined)', { project: 'proj' }, new TypeError('The "organization" property is not defined.')],
+    ['organization (empty)', { organization: '', project: 'proj' }, new TypeError('The "organization" property is empty.')],
+    ['project (undefined)', { organization: 'org' }, new TypeError('The "project" property is not defined.')],
+    ['project (empty)', { organization: 'org', project: '' }, new TypeError('The "project" property is empty.')],
+    ['fetch (undefined)', { organization: 'org', project: 'proj' }, new TypeError('The "fetch" property is not defined.')],
+    ['fetch (not a function)', { organization: 'org', project: 'proj', fetch: {} }, new TypeError('The "fetch" property is not a function.')],
+    ['url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')]
+  ].forEach(([testName, input, error]) => {
+    test(`requires ${testName}`, () => {
+      const fn = () => createCompleteUserStoriesGetter(input)
+      expect(fn).toThrow(error)
+    })
   })
 
   test('returns a function', () => {
     const options = createOptions()
-    const fetch = jest.fn()
-    const fn = createCompleteUserStoriesGetter(options, fetch)
+    const fn = createCompleteUserStoriesGetter(options)
     expect(fn).toBeInstanceOf(Function)
   })
 })
 
 function createOptions () {
-  return { organization: 'org', project: 'proj', url: 'https://devops' }
+  return { organization: 'org', project: 'proj', fetch: jest.fn(), url: 'https://devops' }
 }
 
 function createFetchSub () {
@@ -41,7 +41,7 @@ describe('getCompleteUserStories', () => {
     ['empty', [], new TypeError('"ids" must not be empty')],
     ['not numbers', [1, 'two', 3, 'four'], new TypeError('all items in "ids" must be integers: "two", "four"')]
   ])('requires an array of ids (%s)', async function requiresIds (testName, input, error) {
-    const getUserStoryDetails = createCompleteUserStoriesGetter(createOptions(), createFetchSub())
+    const getUserStoryDetails = createCompleteUserStoriesGetter({ ...createOptions(), fetch: createFetchSub() })
     const fn = () => getUserStoryDetails(input)
     return expect(fn).rejects.toThrow(error)
   })
@@ -132,7 +132,7 @@ describe('getCompleteUserStories', () => {
     const fetchMock = jest.fn().mockName('fetchMock')
       .mockReturnValueOnce(detailsResultMock)
       .mockReturnValueOnce(commentsResultMock)
-    const getCompleteUserStories = createCompleteUserStoriesGetter(createOptions(), fetchMock)
+    const getCompleteUserStories = createCompleteUserStoriesGetter({ ...createOptions(), fetch: fetchMock })
     const real = await getCompleteUserStories([5])
     expect(real).toBeInstanceOf(Array)
     expect(real).toHaveLength(1)
@@ -142,18 +142,17 @@ describe('getCompleteUserStories', () => {
   // eslint-disable-next-line jest/no-disabled-tests
   describe.skip('Azure integration', () => {
     let options
-    let fetch
 
     beforeAll(() => {
       options = {
         organization: process.env.AZURE_DEVOPS_ORG,
-        project: process.env.AZURE_DEVOPS_PROJECT
+        project: process.env.AZURE_DEVOPS_PROJECT,
+        fetch: fetchDecorator(nodeFetch, process.env.AZURE_DEVOPS_EXT_PAT)
       }
-      fetch = fetchDecorator(nodeFetch, process.env.AZURE_DEVOPS_EXT_PAT)
     })
 
     test('can access Azure DevOps', async () => {
-      const getStories = createCompleteUserStoriesGetter(options, fetch)
+      const getStories = createCompleteUserStoriesGetter(options)
       const ids = [1224, 1339, 1398]
       const result = await getStories(ids)
       expect(result).not.toBeNull()

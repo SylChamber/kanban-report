@@ -1,29 +1,12 @@
+const validateOptions = require('../api/validate-options')
+
 /**
  * Creates a function that gets current user story Ids from Azure DevOps.
  * @param {import("../api/create-azure-devops-client").AzureDevopsClientOptions} options Options for accessing Azure DevOps data.
- * @param {import("../api/create-azure-devops-client").fetch} fetch Interface that fetches resources from the network.
  * @returns {getCurrentUserStoryIds} A function that gets the current user story ids at the date specified.
  */
-function createCurrentUserStoryIdsGetter (options, fetch) {
-  if (options === undefined) {
-    throw new ReferenceError('"options" is not defined')
-  }
-
-  if (options.organization === undefined || options.organization === '') {
-    throw new TypeError('The "options.organization" property is not defined')
-  }
-
-  if (options.project === undefined || options.project === '') {
-    throw new TypeError('The "options.project" property is not defined')
-  }
-
-  if (options.url === undefined || options.url === '') {
-    options.url = 'https://dev.azure.com'
-  }
-
-  if (fetch === undefined) {
-    throw new ReferenceError('"fetch" is not defined')
-  }
+function createCurrentUserStoryIdsGetter (options) {
+  const { organization, project, fetch, url } = validateOptions(options)
 
   return getCurrentUserStoryIds
 
@@ -50,7 +33,7 @@ function createCurrentUserStoryIdsGetter (options, fetch) {
       throw new TypeError('The "userStoryOptions.areaPath" property is not defined')
     }
 
-    const urlWiql = `${options.url}/${options.organization}/${options.project}/_apis/wit/wiql`
+    const urlWiql = `${url}/${organization}/${project}/_apis/wit/wiql`
     const states = userStoryOptions.activeStates.map(s => `'${s}'`).join(', ')
     const asOf = userStoryOptions.referenceDate
       ? ` ASOF '${userStoryOptions.referenceDate?.toISOString()}'`

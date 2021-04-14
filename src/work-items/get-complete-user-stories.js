@@ -1,31 +1,16 @@
 const createUserStoryDetailsGetter = require('./get-user-story-details')
 const createUserStoryCommentsGetter = require('./get-user-story-comments')
+const validateOptions = require('../api/validate-options')
 
 /**
  * Creates a function that gets complete user stories for the specified ids.
  * @param {{organization:string, project: string, [url]:string}} options - Options for Azure DevOps.
- * @param {import('../api/create-azure-devops-client').fetch} fetch - Interface that fetches resources from the network.
  * @returns {getCompleteUserStories} A function that gets complete user stories for the specified ids.
  */
-function createCompleteUserStoriesGetter ({ organization, project, url }, fetch) {
-  if (organization === undefined) {
-    throw new TypeError('The "organization" property of the options is not defined')
-  }
-
-  if (project === undefined) {
-    throw new TypeError('The "project" property of the options is not defined')
-  }
-
-  if (url === undefined || url === '') {
-    url = 'https://dev.azure.com'
-  }
-
-  if (fetch === undefined) {
-    throw new ReferenceError('"fetch" is not defined')
-  }
-
-  const getUserStoryDetails = createUserStoryDetailsGetter({ organization, project, url }, fetch)
-  const getUserStoryComments = createUserStoryCommentsGetter({ organization, project, url }, fetch)
+function createCompleteUserStoriesGetter (options) {
+  options = validateOptions(options)
+  const getUserStoryDetails = createUserStoryDetailsGetter(options)
+  const getUserStoryComments = createUserStoryCommentsGetter(options)
 
   return getCompleteUserStories
 

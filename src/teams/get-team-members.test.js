@@ -1,43 +1,41 @@
 const createTeamMembersGetter = require('./get-team-members')
 
 describe('createTeamMembersGetter', function () {
-  test('requires options', function () {
-    const fn = () => createTeamMembersGetter(undefined, {})
-    expect(fn).toThrow(new ReferenceError('"options" is not defined'))
-  })
-
-  test('requires options.organization', function () {
-    const options = { project: 'proj' }
-    const fn = () => createTeamMembersGetter(options, {})
-    expect(fn).toThrow(new TypeError('The "options.organization" property is not defined'))
-  })
-
-  test('requires options.project', function () {
-    const options = { organization: 'org' }
-    const fn = () => createTeamMembersGetter(options, {})
-    expect(fn).toThrow(new TypeError('The "options.project" property is not defined'))
-  })
-
-  test('requires fetch', function () {
-    const options = { organization: 'org', project: 'proj' }
-    const fn = () => createTeamMembersGetter(options)
-    expect(fn).toThrow(new ReferenceError('"fetch" is not defined'))
+  [
+    ['options (undefined)', undefined, new ReferenceError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
+    ['organization (undefined)', { project: 'proj' }, new TypeError('The "organization" property is not defined.')],
+    ['organization (empty)', { organization: '', project: 'proj' }, new TypeError('The "organization" property is empty.')],
+    ['project (undefined)', { organization: 'org' }, new TypeError('The "project" property is not defined.')],
+    ['project (empty)', { organization: 'org', project: '' }, new TypeError('The "project" property is empty.')],
+    ['fetch (undefined)', { organization: 'org', project: 'proj' }, new TypeError('The "fetch" property is not defined.')],
+    ['fetch (not a function)', { organization: 'org', project: 'proj', fetch: {} }, new TypeError('The "fetch" property is not a function.')],
+    ['url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')]
+  ].forEach(([testName, input, error]) => {
+    test(`requires ${testName}`, () => {
+      const fn = () => createTeamMembersGetter(input)
+      expect(fn).toThrow(error)
+    })
   })
 
   test('returns a function', function () {
-    const options = { organization: 'org', project: 'proj' }
-    const fn = createTeamMembersGetter(options, {})
+    const options = { organization: 'org', project: 'proj', fetch: jest.fn() }
+    const fn = createTeamMembersGetter(options)
     expect(fn).toBeInstanceOf(Function)
   })
 })
 
 describe('getTeamMembers', function () {
+  const options = {
+    organization: 'org',
+    project: 'proj'
+  }
+
   test.each([
     ['undefined', undefined],
     ['empty string', '']
   ])('requires team (%s)', function requiresTeam (name, team) {
     const fetch = createFetchStub().fetch
-    const getTeamMembers = createTeamMembersGetter(options, fetch)
+    const getTeamMembers = createTeamMembersGetter({ ...options, fetch })
     const promise = getTeamMembers(team)
     return expect(promise).rejects.toThrow(new ReferenceError('"team" is not defined'))
   })
@@ -49,7 +47,7 @@ describe('getTeamMembers', function () {
       url: `https://dev.azure.com/${options.organization}/_apis/projects/${options.project}/teams/${team}/members`
     }
     fetchStub.setExpectedCall(expected)
-    const getTeamMembers = createTeamMembersGetter(options, fetchStub.fetch)
+    const getTeamMembers = createTeamMembersGetter({ ...options, fetch: fetchStub.fetch })
     await getTeamMembers(team)
     const fetchWasCalled = fetchStub.wasCalledWith(expected.url)
     if (!fetchWasCalled) {
@@ -73,7 +71,7 @@ describe('getTeamMembers', function () {
       { name: 'Sam Adams', email: 'sam.adams@samadams.com' }
     ]
     fetchStub.setReturnedData(returnedData)
-    const getTeamMembers = createTeamMembersGetter(options, fetchStub.fetch)
+    const getTeamMembers = createTeamMembersGetter({ ...options, fetch: fetchStub.fetch })
     const result = await getTeamMembers(team)
     expect(result).toBeInstanceOf(Array)
     expect(result).toEqual(expect.arrayContaining(expected))
@@ -98,7 +96,7 @@ describe('getTeamMembers', function () {
     }
     const expected = [{ name: 'John Doe', email: 'john.doe@example.com' }]
     fetchStub.setReturnedData(returnedData)
-    const getTeamMembers = createTeamMembersGetter(options, fetchStub.fetch)
+    const getTeamMembers = createTeamMembersGetter({ ...options, fetch: fetchStub.fetch })
     const result = await getTeamMembers(team)
     expect(result).toHaveLength(expected.length)
     expect(result).toEqual(expect.arrayContaining(expected))
@@ -172,10 +170,5 @@ describe('getTeamMembers', function () {
         }
       }
     }
-  }
-
-  const options = {
-    organization: 'org',
-    project: 'proj'
   }
 })

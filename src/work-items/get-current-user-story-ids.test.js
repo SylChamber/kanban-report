@@ -3,48 +3,25 @@ const createGetCurrentUserStoryIdsGetter = require('./get-current-user-story-ids
 const fetchDecorator = require('../api/decorate-fetch-with-options')
 
 describe('createCurrentGetUserStoryIdsGetter', () => {
-  test.each([
-    ['options', undefined, new ReferenceError('"options" is not defined')],
-    [
-      'options.organization',
-      { project: 'proj' },
-      new TypeError('The "options.organization" property is not defined')
-    ],
-    [
-      'options.project',
-      { organization: 'org' },
-      new TypeError('The "options.project" property is not defined')
-    ]
-  ])('requires %s', function requiresParameters (paramName, input, expectedError) {
-    const fn = () => createGetCurrentUserStoryIdsGetter(input, function () {})
-    expect(fn).toThrow(expectedError)
-  })
-
-  test('requires fetch', () => {
-    const options = { organization: 'org', project: 'proj' }
-    const fn = () => createGetCurrentUserStoryIdsGetter(options, undefined)
-    expect(fn).toThrow(new ReferenceError('"fetch" is not defined'))
-  })
-
-  test.each([
-    ['undefined', {}, 'https://dev.azure.com'],
-    ['empty', { url: '' }, 'https://dev.azure.com'],
-    ['provided', { url: 'https://dev' }, 'https://dev']
-  ])('provides Azure DevOps url (or not) if %s',
-    async function providesUrl (testName, input, expected) {
-      const options = { organization: 'org', project: 'proj', ...input }
-      const fetch = jest.fn().mockReturnValue(Promise.resolve({
-        json: async () => Promise.resolve({ asOf: '2020-02-20T20:20:20Z', items: [] })
-      }))
-      const userStoryOptions = { activeStates: ['Active'], areaPath: 'area' }
-      const getStoryIds = createGetCurrentUserStoryIdsGetter(options, fetch)
-      await getStoryIds(userStoryOptions)
-      expect(fetch.mock.calls[0][0]).toEqual(expect.stringContaining(expected))
+  [
+    ['options (undefined)', undefined, new ReferenceError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
+    ['organization (undefined)', { project: 'proj' }, new TypeError('The "organization" property is not defined.')],
+    ['organization (empty)', { organization: '', project: 'proj' }, new TypeError('The "organization" property is empty.')],
+    ['project (undefined)', { organization: 'org' }, new TypeError('The "project" property is not defined.')],
+    ['project (empty)', { organization: 'org', project: '' }, new TypeError('The "project" property is empty.')],
+    ['fetch (undefined)', { organization: 'org', project: 'proj' }, new TypeError('The "fetch" property is not defined.')],
+    ['fetch (not a function)', { organization: 'org', project: 'proj', fetch: {} }, new TypeError('The "fetch" property is not a function.')],
+    ['url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')]
+  ].forEach(([testName, input, error]) => {
+    test(`requires ${testName}`, () => {
+      const fn = () => createGetCurrentUserStoryIdsGetter(input)
+      expect(fn).toThrow(error)
     })
+  })
 
   test('returns a function', () => {
-    const options = { organization: 'org', project: 'proj' }
-    const fn = createGetCurrentUserStoryIdsGetter(options, function () {})
+    const options = { organization: 'org', project: 'proj', fetch: jest.fn() }
+    const fn = createGetCurrentUserStoryIdsGetter(options)
     expect(fn).toBeInstanceOf(Function)
   })
 })
@@ -56,6 +33,7 @@ describe('getCurrentUserStoryIds', () => {
   const options = {
     organization: 'org',
     project: 'proj',
+    fetch: jest.fn(),
     url: 'https://devops'
   }
 
@@ -64,7 +42,7 @@ describe('getCurrentUserStoryIds', () => {
   })
 
   test('requires user story options', async () => {
-    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, jest.fn())
+    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options)
     const fn = async () => await getCurrentUserStoryIds()
     return expect(fn).rejects.toThrow(new ReferenceError('"userStoryOptions" is not defined'))
   })
@@ -74,7 +52,7 @@ describe('getCurrentUserStoryIds', () => {
     ['undefined', { areaPath: undefined }],
     ['empty string', { areaPath: '' }]
   ])('requires area path (%s)', function requiresAreaPath (paramName, input) {
-    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, jest.fn())
+    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options)
     const fn = () => getCurrentUserStoryIds(Object.assign(input, { activeStates: ['Active'] }))
     return expect(fn).rejects.toThrow(new TypeError('The "userStoryOptions.areaPath" property is not defined'))
   })
@@ -83,7 +61,7 @@ describe('getCurrentUserStoryIds', () => {
     ['undefined', { }, new TypeError('The "userStoryOptions.activeStates" property is not defined')],
     ['empty', { activeStates: [] }, new TypeError('The "userStoryOptions.activeStates" property must not be empty')]
   ])('requires active states (%s)', function requiresActiveStates (paramName, input, error) {
-    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, jest.fn())
+    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options)
     const fn = () => getCurrentUserStoryIds(Object.assign(input, { areaPath: 'area51' }))
     return expect(fn).rejects.toThrow(error)
   })
@@ -106,7 +84,7 @@ describe('getCurrentUserStoryIds', () => {
       }
       const expectedUrl = `${options.url}/${options.organization}/${options.project}/_apis/wit/wiql`
       const fetchSub = jest.fn().mockName('fetchSub').mockReturnValue(mockedResponse)
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, fetchSub)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter({ ...options, fetch: fetchSub })
       await getCurrentUserStoryIds(storyOptions)
       expect(fetchSub).toHaveBeenCalledWith(expectedUrl, expect.anything())
     })
@@ -144,7 +122,7 @@ describe('getCurrentUserStoryIds', () => {
         method: 'POST'
       }
       const fetchSub = jest.fn().mockName('fetchSub').mockReturnValue(mockedResponse)
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, fetchSub)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter({ ...options, fetch: fetchSub })
       await getCurrentUserStoryIds(storyOptions)
       expect(fetchSub).toHaveBeenCalledWith(expect.anything(), expectedOptions)
     })
@@ -164,7 +142,7 @@ describe('getCurrentUserStoryIds', () => {
       }
       const response = { json: () => data }
       const fetch = jest.fn().mockName('fetchMock').mockReturnValue(response)
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, fetch)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter({ ...options, fetch })
       const result = await getCurrentUserStoryIds(storyOptions)
       expect(result).toHaveProperty('referenceDate')
       expect(result.referenceDate).toEqual(storyOptions.referenceDate)
@@ -177,7 +155,7 @@ describe('getCurrentUserStoryIds', () => {
       }
       const response = { json: () => data }
       const fetch = jest.fn().mockName('fetchMock').mockReturnValue(response)
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, fetch)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter({ ...options, fetch })
       const result = await getCurrentUserStoryIds(storyOptions)
       expect(result).toHaveProperty('stories')
       expect(result.stories).toEqual(data.workItems)
@@ -187,18 +165,17 @@ describe('getCurrentUserStoryIds', () => {
   // eslint-disable-next-line jest/no-disabled-tests
   describe.skip('Azure integration', () => {
     let options
-    let fetch
 
     beforeAll(() => {
       options = {
         organization: process.env.AZURE_DEVOPS_ORG,
-        project: process.env.AZURE_DEVOPS_PROJECT
+        project: process.env.AZURE_DEVOPS_PROJECT,
+        fetch: fetchDecorator(nodeFetch, process.env.AZURE_DEVOPS_EXT_PAT)
       }
-      fetch = fetchDecorator(nodeFetch, process.env.AZURE_DEVOPS_EXT_PAT)
     })
 
     test('can access Azure DevOps', async () => {
-      const getStoryIds = createGetCurrentUserStoryIdsGetter(options, fetch)
+      const getStoryIds = createGetCurrentUserStoryIdsGetter(options)
       const storyOptions = {
         areaPath: options.project,
         activeStates: ['Active', 'Validation', 'Attente'],

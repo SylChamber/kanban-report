@@ -1,4 +1,5 @@
 const mapToPerson = require('./map-to-person')
+const validateOptions = require('../api/validate-options')
 
 /**
  * @module api/createTeamMembersGetter
@@ -7,25 +8,10 @@ const mapToPerson = require('./map-to-person')
 /**
  * Creates a function that gets the members for the specified team.
  * @param {AzdevClientOptions} options Options for getting an Azure DevOps REST API client.
- * @param {fetch} fetch Interface that fetches resources from the network.
  * @returns {getTeamMembers} Function that gets the members for the specified team.
  */
-function createTeamMembersGetter (options, fetch) {
-  if (options === undefined) {
-    throw new ReferenceError('"options" is not defined')
-  }
-
-  if (options.organization === undefined || options.organization === '') {
-    throw new TypeError('The "options.organization" property is not defined')
-  }
-
-  if (options.project === undefined || options.project === '') {
-    throw new TypeError('The "options.project" property is not defined')
-  }
-
-  if (fetch === undefined) {
-    throw new ReferenceError('"fetch" is not defined')
-  }
+function createTeamMembersGetter (options) {
+  const { organization, project, url, fetch } = validateOptions(options)
 
   return getTeamMembers
 
@@ -40,9 +26,9 @@ function createTeamMembersGetter (options, fetch) {
       throw new ReferenceError('"team" is not defined')
     }
 
-    const url = `https://dev.azure.com/${options.organization}/_apis/projects/${options.project}/teams/${team}/members`
+    const teamMembersUrl = `${url}/${organization}/_apis/projects/${project}/teams/${team}/members`
     const mapMemberToPerson = member => mapToPerson(member.identity)
-    const response = await fetch(url)
+    const response = await fetch(teamMembersUrl)
 
     /**
      * @type {TeamMembersResult}

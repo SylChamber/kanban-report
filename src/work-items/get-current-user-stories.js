@@ -1,27 +1,16 @@
 const createGetCurrentStoryIdsGetter = require('./get-current-user-story-ids')
 const createGetCompleteUserStoriesGetter = require('./get-complete-user-stories')
+const validateOptions = require('../api/validate-options')
 
 /**
  * Creates a function that gets current user stories from Azure DevOps.
  * @param {AzureDevopsClientOptions} options - Options for accessing Azure DevOps data.
- * @param {fetch} fetch - Interface that fetches resources from the network.
+ * @returns {getCurrentUserStories}
  */
-function createGetCurrentUserStoriesGetter ({ organization, project }, fetch) {
-  if (organization === undefined) {
-    throw new TypeError('The "options.organization" property is not defined.')
-  }
-
-  if (project === undefined) {
-    throw new TypeError('The "options.project" property is not defined.')
-  }
-
-  if (fetch === undefined) {
-    throw new ReferenceError('"fetch" is not defined.')
-  }
-
-  const options = { organization, project }
-  const getCurrentStoryIds = createGetCurrentStoryIdsGetter(options, fetch)
-  const getCompleteUserStories = createGetCompleteUserStoriesGetter(options, fetch)
+function createGetCurrentUserStoriesGetter (options) {
+  options = validateOptions(options)
+  const getCurrentStoryIds = createGetCurrentStoryIdsGetter(options)
+  const getCompleteUserStories = createGetCompleteUserStoriesGetter(options)
 
   return getCurrentUserStories
 

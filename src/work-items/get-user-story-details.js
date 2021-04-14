@@ -1,27 +1,13 @@
+const validateOptions = require('../api/validate-options')
 const mapToUserStory = require('./map-to-user-story')
 
 /**
  * Creates a function that gets user story details from Azure DevOps.
  * @param {{organization:string, project: string, [url]:string}} options - Options for Azure DevOps.
- * @param {import('../api/create-azure-devops-client').fetch} fetch - Interface that fetches resources from the network.
  * @returns {getStoryDetails} A function that gets user story details for the specified ids.
  */
-function createUserStoryDetailsGetter ({ organization, project, url }, fetch) {
-  if (organization === undefined) {
-    throw new TypeError('The "organization" property of the options is not defined')
-  }
-
-  if (project === undefined) {
-    throw new TypeError('The "project" property of the options is not defined')
-  }
-
-  if (url === undefined || url === '') {
-    url = 'https://dev.azure.com'
-  }
-
-  if (fetch === undefined) {
-    throw new ReferenceError('"fetch" is not defined')
-  }
+function createUserStoryDetailsGetter (options) {
+  const { organization, project, url, fetch } = validateOptions(options)
 
   return getStoryDetails
 

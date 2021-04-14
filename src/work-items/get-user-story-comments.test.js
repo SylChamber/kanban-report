@@ -1,35 +1,31 @@
 const createUserStoryCommentsGetter = require('./get-user-story-comments')
 
 describe('createUserStoryCommentsGetter', () => {
-  test.each([
-    ['options', undefined, new TypeError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
-    ['options.organization', { project: 'proj' }, new TypeError('The "organization" property of the options is not defined')],
-    ['options.project', { organization: 'org' }, new TypeError('The "project" property of the options is not defined')]
-  ])('requires %s', function requiresParameters (testName, input, error) {
-    const fn = () => createUserStoryCommentsGetter(input)
-    expect(fn).toThrow(error)
-  })
-
-  test('requires fetch', () => {
-    const options = createOptions()
-    const fn = () => createUserStoryCommentsGetter(options, undefined)
-    expect(fn).toThrow(new ReferenceError('"fetch" is not defined'))
+  [
+    ['options (undefined)', undefined, new ReferenceError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
+    ['organization (undefined)', { project: 'proj' }, new TypeError('The "organization" property is not defined.')],
+    ['organization (empty)', { organization: '', project: 'proj' }, new TypeError('The "organization" property is empty.')],
+    ['project (undefined)', { organization: 'org' }, new TypeError('The "project" property is not defined.')],
+    ['project (empty)', { organization: 'org', project: '' }, new TypeError('The "project" property is empty.')],
+    ['fetch (undefined)', { organization: 'org', project: 'proj' }, new TypeError('The "fetch" property is not defined.')],
+    ['fetch (not a function)', { organization: 'org', project: 'proj', fetch: {} }, new TypeError('The "fetch" property is not a function.')],
+    ['url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')]
+  ].forEach(([testName, input, error]) => {
+    test(`requires ${testName}`, () => {
+      const fn = () => createUserStoryCommentsGetter(input)
+      expect(fn).toThrow(error)
+    })
   })
 
   test('returns a function', () => {
     const options = createOptions()
-    const fetch = jest.fn()
-    const fn = createUserStoryCommentsGetter(options, fetch)
+    const fn = createUserStoryCommentsGetter(options)
     expect(fn).toBeInstanceOf(Function)
   })
 })
 
 function createOptions () {
-  return { organization: 'org', project: 'proj', url: 'https://devops' }
-}
-
-function createFetchSub () {
-  return jest.fn().mockName('fetchStub')
+  return { organization: 'org', project: 'proj', fetch: jest.fn().mockName('fetchStub'), url: 'https://devops' }
 }
 
 describe('getUserStoryComments', () => {
@@ -38,7 +34,7 @@ describe('getUserStoryComments', () => {
     ['string', '1', new TypeError('"id" is not an integer')],
     ['double', 1.5, new TypeError('"id" is not an integer')]
   ])('requires id (%s)', async function requiresId (testName, input, error) {
-    const getUserStoryComments = createUserStoryCommentsGetter(createOptions(), createFetchSub())
+    const getUserStoryComments = createUserStoryCommentsGetter(createOptions())
     const fn = () => getUserStoryComments(input)
     return expect(fn).rejects.toThrow(error)
   })
@@ -77,7 +73,7 @@ describe('getUserStoryComments', () => {
       url: 'https://devops/workitems/5/comments/500'
     }
     const fetchMock = jest.fn().mockName('fetchMock').mockReturnValue(mockReturn)
-    const getUserStoryComments = createUserStoryCommentsGetter(createOptions(), fetchMock)
+    const getUserStoryComments = createUserStoryCommentsGetter({ ...createOptions(), fetch: fetchMock })
     const real = await getUserStoryComments(5)
     expect(real).toBeInstanceOf(Array)
     expect(real).toHaveLength(1)
