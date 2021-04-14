@@ -3,10 +3,13 @@ const createGetTeamSettingsGetter = require('./get-team-settings')
 describe('createGetTeamSettingsGetter', () => {
   [
     ['options (undefined)', undefined, new ReferenceError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
-    ['options.organization (undefined)', { project: 'proj', team: 'team' }, new TypeError('The "options.organization" property is not defined.')],
-    ['options.organization (empty)', { organization: '', project: 'proj', team: 'team' }, new TypeError('The "options.organization" property is empty.')],
-    ['options.project (undefined)', { organization: 'org', team: 'team' }, new TypeError('The "options.project" property is not defined.')],
-    ['options.project (empty)', { organization: 'org', project: '', team: 'team' }, new TypeError('The "options.project" property is empty.')]
+    ['organization (undefined)', { project: 'proj' }, new TypeError('The "organization" property is not defined.')],
+    ['organization (empty)', { organization: '', project: 'proj' }, new TypeError('The "organization" property is empty.')],
+    ['project (undefined)', { organization: 'org' }, new TypeError('The "project" property is not defined.')],
+    ['project (empty)', { organization: 'org', project: '' }, new TypeError('The "project" property is empty.')],
+    ['fetch (undefined)', { organization: 'org', project: 'proj' }, new TypeError('The "fetch" property is not defined.')],
+    ['fetch (not a function)', { organization: 'org', project: 'proj', fetch: {} }, new TypeError('The "fetch" property is not a function.')],
+    ['url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')]
   ].forEach(([testName, input, error]) => {
     test(`requires ${testName}`, () => {
       const fn = () => createGetTeamSettingsGetter(input)
@@ -14,28 +17,22 @@ describe('createGetTeamSettingsGetter', () => {
     })
   })
 
-  test('requires fetch', () => {
-    const options = { organization: 'org', project: 'proj' }
-    const fn = () => createGetTeamSettingsGetter(options, undefined)
-    expect(fn).toThrow(new ReferenceError('"fetch" is not defined.'))
-  })
-
   test('returns a function', () => {
-    const options = { organization: 'org', project: 'proj' }
-    const fn = createGetTeamSettingsGetter(options, jest.fn().mockName('fetchStub'))
+    const options = { organization: 'org', project: 'proj', fetch: jest.fn().mockName('fetchStub') }
+    const fn = createGetTeamSettingsGetter(options)
     expect(fn).toBeInstanceOf(Function)
   })
 })
 
 describe('getTeamSettings', () => {
-  const options = { organization: 'org', project: 'proj' }
+  const options = { organization: 'org', project: 'proj', fetch: jest.fn().mockName('fetchStub') }
 
   ;[
     ['undefined', undefined, new ReferenceError('"team" is not defined.')],
     ['empty', '', new TypeError('"team" is empty.')]
   ].forEach(([testName, input, error]) => {
     test(`requires team (${testName})`, async () => {
-      const getTeamSettings = createGetTeamSettingsGetter(options, jest.fn().mockName('fetchStub'))
+      const getTeamSettings = createGetTeamSettingsGetter(options)
       const fn = () => getTeamSettings(input)
       return expect(fn).rejects.toThrow(error)
     })
@@ -68,7 +65,7 @@ describe('getTeamSettings', () => {
     const fetchMock = jest.fn().mockName('fetchMock')
       .mockResolvedValueOnce({ json: async () => backlogConfig })
       .mockResolvedValueOnce({ json: async () => teamFieldValues })
-    const getTeamSettings = createGetTeamSettingsGetter(options, fetchMock)
+    const getTeamSettings = createGetTeamSettingsGetter({ ...options, fetch: fetchMock })
     const actual = await getTeamSettings('team')
     expect(actual).toEqual(expect.objectContaining(expected))
   })
@@ -87,7 +84,7 @@ describe('getTeamSettings', () => {
     const fetchMock = jest.fn().mockName('fetchMock')
       .mockResolvedValueOnce({ json: async () => backlogConfig })
       .mockResolvedValueOnce({ json: async () => teamFieldValues })
-    const getTeamSettings = createGetTeamSettingsGetter(options, fetchMock)
+    const getTeamSettings = createGetTeamSettingsGetter({ ...options, fetch: fetchMock })
     const actual = await getTeamSettings('team')
     expect(actual).toEqual(expect.objectContaining(expected))
   })

@@ -1,33 +1,12 @@
+const validateOptions = require('../api/validate-options')
+
 /**
  * Creates a function that gets settings for a team.
  * @param {AzureDevopsClientOptions} options - Options for Azure DevOps REST API calls.
- * @param {fetch} fetch - Interface that fetches resources from the network.
  * @returns {getTeamSettings} A function that gets settings for a team.
  */
-function createGetTeamSettingsGetter ({ organization, project, url }, fetch) {
-  if (organization === undefined) {
-    throw new TypeError('The "options.organization" property is not defined.')
-  }
-
-  if (organization === '') {
-    throw new TypeError('The "options.organization" property is empty.')
-  }
-
-  if (project === undefined) {
-    throw new TypeError('The "options.project" property is not defined.')
-  }
-
-  if (project === '') {
-    throw new TypeError('The "options.project" property is empty.')
-  }
-
-  if (url === undefined || url === '') {
-    url = 'https://dev.azure.com'
-  }
-
-  if (fetch === undefined) {
-    throw new ReferenceError('"fetch" is not defined.')
-  }
+function createGetTeamSettingsGetter (options) {
+  const { organization, project, url, fetch } = validateOptions(options)
 
   return getTeamSettings
 
