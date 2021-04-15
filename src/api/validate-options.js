@@ -32,7 +32,7 @@ function validateOptions ({ organization, project, fetch, url }) {
     throw new TypeError('The "url" property is empty.')
   }
 
-  return { organization, project, fetch, url: url ?? 'https://dev.azure.com' }
+  return { ...arguments[0], url: url ?? 'https://dev.azure.com' }
 }
 
 /**

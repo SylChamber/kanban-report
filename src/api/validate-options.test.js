@@ -29,4 +29,10 @@ describe('validateOptions', () => {
     const actual = validateOptions(options)
     expect(actual).toEqual(options)
   })
+
+  test('returns non validated properties', () => {
+    const options = { organization: 'org', project: 'proj', url: 'https://devops', fetch: jest.fn(), other: {} }
+    const actual = validateOptions(options)
+    expect(actual).toEqual(options)
+  })
 })
