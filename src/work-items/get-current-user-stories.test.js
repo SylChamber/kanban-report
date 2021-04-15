@@ -18,7 +18,7 @@ describe('createGetCurrentUserStoriesGetter', () => {
   })
 
   test('returns a function', () => {
-    const options = { organization: 'org', project: 'proj', fetch: jest.fn() }
+    const options = { organization: 'org', project: 'proj', fetch: jest.fn(), getTeamSettings: jest.fn() }
     const fn = createGetCurrentUserStoriesGetter(options)
     expect(fn).toBeInstanceOf(Function)
   })
@@ -32,6 +32,7 @@ describe('getCurrentUserStories', () => {
     organization: 'org',
     project: 'proj',
     fetch: jest.fn().mockName('jestStub'),
+    getTeamSettings: jest.fn().mockName('getTeamSettings'),
     url: 'https://devops'
   }
 

@@ -25,6 +25,7 @@ describe('AzureDevopsClient', function () {
       organization: 'org',
       project: 'project',
       fetch: jest.fn(),
+      getTeamSettings: jest.fn(),
       url: 'https://devops'
     }
     const client = createAzureDevopsClient(options)
@@ -33,7 +34,7 @@ describe('AzureDevopsClient', function () {
   })
 
   test('exposes getCurrentUserStories', () => {
-    const options = { organization: 'org', project: 'proj', fetch: jest.fn(), url: 'https://devops' }
+    const options = { organization: 'org', project: 'proj', fetch: jest.fn(), getTeamSettings: jest.fn(), url: 'https://devops' }
     const client = createAzureDevopsClient(options)
     expect(client).toHaveProperty('getCurrentUserStories')
     expect(client.getCurrentUserStories).toBeInstanceOf(Function)
@@ -46,6 +47,7 @@ describe('AzureDevopsClient', function () {
         organization: process.env.AZURE_DEVOPS_ORG,
         project: process.env.AZURE_DEVOPS_PROJECT,
         url: process.env.AZURE_DEVOPS_URL,
+        getTeamSettings: require('../teams/get-team-settings'),
         fetch
       }
       const team = process.env.AZURE_DEVOPS_TEAM
