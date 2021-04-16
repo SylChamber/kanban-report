@@ -2,43 +2,48 @@ const validateOptions = require('../api/validate-options')
 
 /**
  * Creates a function that gets current user story Ids from Azure DevOps.
- * @param {import("../api/create-azure-devops-client").AzureDevopsClientOptions} options Options for accessing Azure DevOps data.
+ * @param {AzureDevopsClientOptions & {getTeamSettings:GetTeamSettings}} options Options for accessing Azure DevOps data.
  * @returns {getCurrentUserStoryIds} A function that gets the current user story ids at the date specified.
  */
 function createCurrentUserStoryIdsGetter (options) {
   const { organization, project, fetch, url } = validateOptions(options)
+
+  if (!Object.prototype.hasOwnProperty.call(options, 'getTeamSettings')) {
+    throw new TypeError('The "getTeamSettings" property is not defined.')
+  }
+
+  const getTeamSettings = options.getTeamSettings
+
+  if (typeof getTeamSettings !== 'function') {
+    throw new TypeError('The "getTeamSettings" property is not a function.')
+  }
 
   return getCurrentUserStoryIds
 
   /**
  * Gets the current user story Ids at the reference date specified in the options,
  * e.g. the active stories and the stories closed during the reference date.
- * @param {UserStoryOptions} userStoryOptions - Options for getting user stories.
+ * @param {string} team - The team for which current user story ids are required.
+ * @param {Date} [referenceDate] - The reference date at which the current (at the time) user stories are required; if not specified, the current date is used.
  * @returns {Promise<UserStoryReferencesResult>} A promise that resolves in a result of user story Ids that were current at the specified reference date.
  */
-  async function getCurrentUserStoryIds (userStoryOptions) {
-    if (userStoryOptions === undefined) {
-      throw new ReferenceError('"userStoryOptions" is not defined')
+  async function getCurrentUserStoryIds (team, referenceDate) {
+    if (team === undefined) {
+      throw new ReferenceError('"team" is not defined.')
     }
 
-    if (userStoryOptions.activeStates === undefined) {
-      throw new TypeError('The "userStoryOptions.activeStates" property is not defined')
-    }
-
-    if (userStoryOptions.activeStates.length === 0) {
-      throw new TypeError('The "userStoryOptions.activeStates" property must not be empty')
-    }
-
-    if (userStoryOptions.areaPath === undefined || userStoryOptions.areaPath === '') {
-      throw new TypeError('The "userStoryOptions.areaPath" property is not defined')
+    if (team === '') {
+      throw new TypeError('"team" is empty.')
     }
 
     const urlWiql = `${url}/${organization}/${project}/_apis/wit/wiql`
-    const states = userStoryOptions.activeStates.map(s => `'${s}'`).join(', ')
-    const asOf = userStoryOptions.referenceDate
-      ? ` ASOF '${userStoryOptions.referenceDate?.toISOString()}'`
+    const teamSettings = await getTeamSettings(team)
+    const states = teamSettings.inProgressStates.map(s => `'${s}'`).join(', ')
+    const areas = teamSettings.areas.map(a => `'${a}'`).join(', ')
+    const asOf = referenceDate
+      ? ` ASOF '${referenceDate?.toISOString()}'`
       : ''
-    const query = `Select Id from WorkItems where [Work Item Type] = 'User Story' and [Area Path] under '${userStoryOptions.areaPath}' and (State in (${states}) or (State = 'Closed' and [Closed Date] >= @Today)) order by [Changed Date] DESC${asOf}`
+    const query = `Select Id from WorkItems where [Work Item Type] = 'User Story' and [Area Path] in (${areas}) and (State in (${states}) or (State = 'Closed' and [Closed Date] >= @Today)) order by [Changed Date] DESC${asOf}`
     const fetchOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -57,6 +62,12 @@ function createCurrentUserStoryIdsGetter (options) {
     }
   }
 }
+
+/**
+ * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
+ * @typedef {import('../teams/get-team-settings').TeamSettings} TeamSettings
+ * @typedef {function(string):Promise<TeamSettings>} GetTeamSettings
+ */
 
 /**
  * @typedef {object} WiqlApiResult

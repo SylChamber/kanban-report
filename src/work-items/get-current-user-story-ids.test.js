@@ -11,16 +11,18 @@ describe('createCurrentGetUserStoryIdsGetter', () => {
     ['project (empty)', { organization: 'org', project: '' }, new TypeError('The "project" property is empty.')],
     ['fetch (undefined)', { organization: 'org', project: 'proj' }, new TypeError('The "fetch" property is not defined.')],
     ['fetch (not a function)', { organization: 'org', project: 'proj', fetch: {} }, new TypeError('The "fetch" property is not a function.')],
-    ['url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')]
+    ['url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')],
+    ['getTeamSettings (undefined)', { organization: 'org', project: 'proj', fetch: jest.fn() }, new TypeError('The "getTeamSettings" property is not defined.')],
+    ['getTeamSettings (not a function)', { organization: 'org', project: 'proj', fetch: jest.fn(), getTeamSettings: {} }, new TypeError('The "getTeamSettings" property is not a function.')]
   ].forEach(([testName, input, error]) => {
-    test(`requires ${testName}`, () => {
+    test(`requires ${testName}`, function requires () {
       const fn = () => createGetCurrentUserStoryIdsGetter(input)
       expect(fn).toThrow(error)
     })
   })
 
   test('returns a function', () => {
-    const options = { organization: 'org', project: 'proj', fetch: jest.fn() }
+    const options = { organization: 'org', project: 'proj', fetch: jest.fn(), getTeamSettings: jest.fn() }
     const fn = createGetCurrentUserStoryIdsGetter(options)
     expect(fn).toBeInstanceOf(Function)
   })
@@ -34,6 +36,7 @@ describe('getCurrentUserStoryIds', () => {
     organization: 'org',
     project: 'proj',
     fetch: jest.fn(),
+    getTeamSettings: jest.fn(),
     url: 'https://devops'
   }
 
@@ -41,66 +44,52 @@ describe('getCurrentUserStoryIds', () => {
     jest.useFakeTimers('modern')
   })
 
-  test('requires user story options', async () => {
-    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options)
-    const fn = async () => await getCurrentUserStoryIds()
-    return expect(fn).rejects.toThrow(new ReferenceError('"userStoryOptions" is not defined'))
-  })
+  function createOptions () {
+    const teamSettings = { areas: ['Team'], inProgressStates: ['Active'] }
+    return {
+      organization: 'org',
+      project: 'proj',
+      fetch: jest.fn(),
+      getTeamSettings: jest.fn().mockName('getTeamSettings')
+        .mockResolvedValue({ json: async () => teamSettings }),
+      url: 'https://devops'
+    }
+  }
 
   test.each([
-    ['none', { }],
-    ['undefined', { areaPath: undefined }],
-    ['empty string', { areaPath: '' }]
-  ])('requires area path (%s)', function requiresAreaPath (paramName, input) {
-    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options)
-    const fn = () => getCurrentUserStoryIds(Object.assign(input, { activeStates: ['Active'] }))
-    return expect(fn).rejects.toThrow(new TypeError('The "userStoryOptions.areaPath" property is not defined'))
-  })
-
-  test.each([
-    ['undefined', { }, new TypeError('The "userStoryOptions.activeStates" property is not defined')],
-    ['empty', { activeStates: [] }, new TypeError('The "userStoryOptions.activeStates" property must not be empty')]
-  ])('requires active states (%s)', function requiresActiveStates (paramName, input, error) {
-    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options)
-    const fn = () => getCurrentUserStoryIds(Object.assign(input, { areaPath: 'area51' }))
+    ['team (undefined)', [undefined], new ReferenceError('"team" is not defined.')],
+    ['team (empty)', [''], new TypeError('"team" is empty.')]
+  ])('requires %s', async function requires (testName, input, error) {
+    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(createOptions())
+    const fn = async () => await getCurrentUserStoryIds(...input)
     return expect(fn).rejects.toThrow(error)
   })
 
   describe('calls fetch', () => {
     test('with right url', async () => {
-      /**
-       * @type {import('./get-current-user-story-ids').UserStoryOptions}
-       */
-      const storyOptions = {
-        activeStates: ['Active', 'Resolved'],
-        areaPath: 'area51',
-        referenceDate: new Date('2020-02-20T20:00:00Z')
-      }
+      const team = 'Area51'
+      const referenceDate = new Date('2020-02-20T20:00:00Z')
       const mockedResponse = {
         json: () => Promise.resolve({
-          asOf: storyOptions.referenceDate.toISOString(),
+          asOf: referenceDate.toISOString(),
           stories: []
         })
       }
+      const fetch = jest.fn().mockName('fetch').mockReturnValue(mockedResponse)
+      const teamSettings = { areas: ['Area51'], inProgressStates: ['Active', 'Resolved'] }
+      const getTeamSettings = jest.fn().mockName('getTeamSettings').mockResolvedValue(teamSettings)
+      const options = { ...createOptions(), fetch, getTeamSettings }
       const expectedUrl = `${options.url}/${options.organization}/${options.project}/_apis/wit/wiql`
-      const fetchSub = jest.fn().mockName('fetchSub').mockReturnValue(mockedResponse)
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter({ ...options, fetch: fetchSub })
-      await getCurrentUserStoryIds(storyOptions)
-      expect(fetchSub).toHaveBeenCalledWith(expectedUrl, expect.anything())
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options)
+      await getCurrentUserStoryIds(team, referenceDate)
+      expect(fetch).toHaveBeenCalledWith(expectedUrl, expect.anything())
     })
 
     test.each([
       ['with reference date', new Date('2020-02-20T20:00:00Z')],
       ['without reference date', undefined]
     ])('with right options (%s)', async function withRightOptions (testName, refDate) {
-      /**
-       * @type {import('./get-current-user-story-ids').UserStoryOptions}
-       */
-      const storyOptions = {
-        activeStates: ['Active', 'Resolved'],
-        areaPath: 'area51',
-        referenceDate: refDate
-      }
+      const team = 'Area51'
       const mockedResponse = {
         json: () => {
           return {
@@ -109,11 +98,16 @@ describe('getCurrentUserStoryIds', () => {
           }
         }
       }
-      const statesString = storyOptions.activeStates.map(s => `'${s}'`).join(', ')
+      const fetch = jest.fn().mockName('fetch').mockReturnValue(mockedResponse)
+      const teamSettings = { areas: ['Area51'], inProgressStates: ['Active', 'Resolved'] }
+      const getTeamSettings = jest.fn().mockName('getTeamSettings').mockResolvedValue(teamSettings)
+      const options = { ...createOptions(), fetch, getTeamSettings }
+      const statesString = teamSettings.inProgressStates.map(s => `'${s}'`).join(', ')
+      const areasString = teamSettings.areas.map(a => `'${a}'`).join(', ')
       const asOf = refDate
-        ? ` ASOF '${storyOptions.referenceDate.toISOString()}'`
+        ? ` ASOF '${refDate.toISOString()}'`
         : ''
-      const expectedQuery = `Select Id from WorkItems where [Work Item Type] = 'User Story' and [Area Path] under '${storyOptions.areaPath}' and (State in (${statesString}) or (State = 'Closed' and [Closed Date] >= @Today)) order by [Changed Date] DESC${asOf}`
+      const expectedQuery = `Select Id from WorkItems where [Work Item Type] = 'User Story' and [Area Path] in (${areasString}) and (State in (${statesString}) or (State = 'Closed' and [Closed Date] >= @Today)) order by [Changed Date] DESC${asOf}`
       const expectedOptions = {
         body: JSON.stringify({ query: expectedQuery }),
         headers: {
@@ -121,42 +115,55 @@ describe('getCurrentUserStoryIds', () => {
         },
         method: 'POST'
       }
-      const fetchSub = jest.fn().mockName('fetchSub').mockReturnValue(mockedResponse)
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter({ ...options, fetch: fetchSub })
-      await getCurrentUserStoryIds(storyOptions)
-      expect(fetchSub).toHaveBeenCalledWith(expect.anything(), expectedOptions)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options)
+      await getCurrentUserStoryIds(team, refDate)
+      expect(fetch).toHaveBeenCalledWith(expect.anything(), expectedOptions)
     })
   })
 
   describe('returns', () => {
-    const storyOptions = {
-      activeStates: ['Active'],
-      areaPath: 'area51',
-      referenceDate: new Date('2020-02-20T20:20:20Z')
+    function createStoryOptions () {
+      // [team, referenceDate]
+      return ['Area51', new Date('2020-02-20T20:20:20Z')]
     }
 
     test('reference date', async () => {
+      const [team, referenceDate] = createStoryOptions()
       const data = {
-        asOf: storyOptions.referenceDate.toISOString(),
+        asOf: referenceDate.toISOString(),
         workItems: []
       }
       const response = { json: () => data }
       const fetch = jest.fn().mockName('fetchMock').mockReturnValue(response)
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter({ ...options, fetch })
-      const result = await getCurrentUserStoryIds(storyOptions)
+      const teamSettings = { areas: [team], inProgressStates: ['Active'] }
+      const getTeamSettings = jest.fn().mockName('getTeamSettings').mockResolvedValue(teamSettings)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter({
+        ...createOptions(),
+        fetch,
+        getTeamSettings
+      })
+      const result = await getCurrentUserStoryIds(team, referenceDate)
       expect(result).toHaveProperty('referenceDate')
-      expect(result.referenceDate).toEqual(storyOptions.referenceDate)
+      expect(result.referenceDate).toEqual(referenceDate)
     })
 
     test('user story references', async () => {
+      const [team, referenceDate] = createStoryOptions()
       const data = {
-        asOf: storyOptions.referenceDate.toISOString(),
+        asOf: referenceDate.toISOString(),
         workItems: [{ id: 60, url: 'https://devops/org/proj/_apis/wit/workitems/60' }]
       }
       const response = { json: () => data }
       const fetch = jest.fn().mockName('fetchMock').mockReturnValue(response)
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter({ ...options, fetch })
-      const result = await getCurrentUserStoryIds(storyOptions)
+      const teamSettings = { areas: [team], inProgressStates: ['Active'] }
+      const getTeamSettings = jest.fn().mockName('getTeamSettings').mockResolvedValue(teamSettings)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(
+        {
+          ...createOptions(),
+          fetch,
+          getTeamSettings
+        })
+      const result = await getCurrentUserStoryIds(team, referenceDate)
       expect(result).toHaveProperty('stories')
       expect(result.stories).toEqual(data.workItems)
     })
@@ -170,18 +177,16 @@ describe('getCurrentUserStoryIds', () => {
       options = {
         organization: process.env.AZURE_DEVOPS_ORG,
         project: process.env.AZURE_DEVOPS_PROJECT,
-        fetch: fetchDecorator(nodeFetch, process.env.AZURE_DEVOPS_EXT_PAT)
+        fetch: fetchDecorator(nodeFetch, process.env.AZURE_DEVOPS_EXT_PAT),
+        getTeamSettings: require('../teams/get-team-settings')
       }
     })
 
     test('can access Azure DevOps', async () => {
       const getStoryIds = createGetCurrentUserStoryIdsGetter(options)
-      const storyOptions = {
-        areaPath: options.project,
-        activeStates: ['Active', 'Validation', 'Attente'],
-        referenceDate: new Date('2021-03-26T04:00:00Z')
-      }
-      const result = await getStoryIds(storyOptions)
+      const team = process.env.AZURE_DEVOPS_EXT_TEAM
+      const referenceDate = new Date('2021-03-26T04:00:00Z')
+      const result = await getStoryIds(team, referenceDate)
       expect(result).not.toBeNull()
     })
   })
