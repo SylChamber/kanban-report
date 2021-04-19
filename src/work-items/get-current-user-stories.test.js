@@ -25,54 +25,48 @@ describe('createGetCurrentUserStoriesGetter', () => {
 })
 
 describe('getCurrentUserStories', () => {
-  /**
-   * @type {import('../api/create-azure-devops-client').AzureDevopsClientOptions}
-   */
-  const options = {
-    organization: 'org',
-    project: 'proj',
-    fetch: jest.fn().mockName('jestStub'),
-    getTeamSettings: jest.fn().mockName('getTeamSettings'),
-    url: 'https://devops'
+  function createOptions () {
+    const teamSettings = { areas: ['Area51'], inProgressStates: ['Active'] }
+    return {
+      organization: 'org',
+      project: 'proj',
+      fetch: jest.fn(),
+      getTeamSettings: jest.fn().mockName('getTeamSettings')
+        .mockResolvedValue(teamSettings),
+      url: 'https://devops'
+    }
   }
 
   beforeAll(() => {
     jest.useFakeTimers('modern')
   })
 
-  ;[
-    ['story options (undefined)', undefined, new ReferenceError("Cannot destructure property 'activeStates' of 'undefined' as it is undefined.")],
-    ['areaPath (undefined)', { activeStates: ['Active'], referenceDate: new Date() }, new TypeError('The "storyOptions.areaPath" is not defined.')],
-    ['areaPath (empty)', { activeStates: ['Active'], areaPath: '', referenceDate: new Date() }, new TypeError('The "storyOptions.areaPath" property must not be empty.')],
-    ['referenceDate (undefined)', { activeStates: ['Active'], areaPath: 'Team' }, new TypeError('The "storyOptions.referenceDate" property is not defined.')],
-    ['referenceDate (invalid)', { activeStates: ['Active'], areaPath: 'Team', referenceDate: new Date('invalid') }, new TypeError('The "storyOptions.referenceDate" property is not a valid date.')]
-  ].forEach(([testName, input, error]) => {
-    test(`requires ${testName}`, async function requiresParameter () {
-      const getCurrentUserStories = createGetCurrentUserStoriesGetter(options)
-      const fn = async () => await getCurrentUserStories(input)
-      return expect(fn).rejects.toThrow(error)
-    })
+  test.each([
+    ['team (undefined)', [undefined], new ReferenceError('"team" is not defined.')],
+    ['team (empty)', [''], new TypeError('"team" is empty.')]
+  ])('requires %s', async function requires (testName, input, error) {
+    const getCurrentUserStories = createGetCurrentUserStoriesGetter(createOptions())
+    const fn = async () => await getCurrentUserStories(...input)
+    return expect(fn).rejects.toThrow(error)
   })
 
   describe('returns', () => {
-    const storyOptions = {
-      activeStates: ['Active'],
-      areaPath: 'area51',
-      referenceDate: new Date('2020-02-20T20:20:20Z')
-    }
-
     test('reference date', async () => {
-      const idsData = { asOf: storyOptions.referenceDate.toISOString(), workItems: [] }
+      const team = 'Area51'
+      const referenceDate = new Date('2020-02-20T20:20:20Z')
+      const idsData = { asOf: referenceDate.toISOString(), workItems: [] }
       const fetch = jest.fn().mockName('fetchMock').mockResolvedValueOnce({ json: async () => idsData })
-      const getStories = createGetCurrentUserStoriesGetter({ ...options, fetch })
-      const result = await getStories(storyOptions)
+      const getStories = createGetCurrentUserStoriesGetter({ ...createOptions(), fetch })
+      const result = await getStories(team, referenceDate)
       expect(result).toHaveProperty('referenceDate')
-      expect(result.referenceDate).toEqual(storyOptions.referenceDate)
+      expect(result.referenceDate).toEqual(referenceDate)
     })
 
     test('user stories', async () => {
+      const team = 'Area51'
+      const referenceDate = new Date('2020-02-20T20:20:20Z')
       const idsData = {
-        asOf: storyOptions.referenceDate.toISOString(),
+        asOf: referenceDate.toISOString(),
         workItems: [{ id: 5, url: 'https://devops/org/proj/_apis/wit/workitems/5' }]
       }
       const detailsData = {
@@ -126,7 +120,7 @@ describe('getCurrentUserStories', () => {
         .mockResolvedValueOnce({ json: async () => detailsData })
         .mockResolvedValueOnce({ json: async () => commentData })
       const expected = {
-        referenceDate: storyOptions.referenceDate,
+        referenceDate: referenceDate,
         stories: [{
           acceptanceCriteria: undefined,
           areaPath: 'TheWay',
@@ -160,8 +154,8 @@ describe('getCurrentUserStories', () => {
           workItemType: 'User Story'
         }]
       }
-      const getStories = createGetCurrentUserStoriesGetter({ ...options, fetch })
-      const result = await getStories(storyOptions)
+      const getStories = createGetCurrentUserStoriesGetter({ ...createOptions(), fetch })
+      const result = await getStories(team, referenceDate)
       expect(result).toHaveProperty('stories')
       expect(result.stories).toBeInstanceOf(Array)
       expect(result.stories).toHaveLength(expected.stories.length)

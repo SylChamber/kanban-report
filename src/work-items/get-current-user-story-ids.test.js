@@ -29,17 +29,6 @@ describe('createCurrentGetUserStoryIdsGetter', () => {
 })
 
 describe('getCurrentUserStoryIds', () => {
-  /**
-   * @type {import('../api/create-azure-devops-client').AzureDevopsClientOptions}
-   */
-  const options = {
-    organization: 'org',
-    project: 'proj',
-    fetch: jest.fn(),
-    getTeamSettings: jest.fn(),
-    url: 'https://devops'
-  }
-
   beforeAll(() => {
     jest.useFakeTimers('modern')
   })
@@ -51,7 +40,7 @@ describe('getCurrentUserStoryIds', () => {
       project: 'proj',
       fetch: jest.fn(),
       getTeamSettings: jest.fn().mockName('getTeamSettings')
-        .mockResolvedValue({ json: async () => teamSettings }),
+        .mockResolvedValue(teamSettings),
       url: 'https://devops'
     }
   }

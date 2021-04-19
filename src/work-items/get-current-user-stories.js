@@ -4,7 +4,7 @@ const validateOptions = require('../api/validate-options')
 
 /**
  * Creates a function that gets current user stories from Azure DevOps.
- * @param {AzureDevopsClientOptions} options - Options for accessing Azure DevOps data.
+ * @param {AzureDevopsClientOptions & {getTeamSettings:GetTeamSettings}} options - Options for accessing Azure DevOps data.
  * @returns {getCurrentUserStories}
  */
 function createGetCurrentUserStoriesGetter (options) {
@@ -16,30 +16,20 @@ function createGetCurrentUserStoriesGetter (options) {
 
   /**
    * Gets the user stories that were current at the specified date and for the states and area path specified.
-   * @param {object} storyOptions - Options for getting user stories.
-   * @param {string[]} storyOptions.activeStates - The states to check for active user stories.
-   * @param {string} storyOptions.areaPath - The area path under which the user stories are categorized.
-   * @param {Date} storyOptions.referenceDate - The reference date at which the current (at the time) user stories are required.
+   * @param {string} team - The team for which current user story ids are required.
+   * @param {Date} [referenceDate] - The reference date at which the current (at the time) user stories are required; if not specified, the current date is used.
    * @returns {Promise<UserStoriesResult>} A promise that resolves in an array of user stories and the reference date at which they were current.
    */
-  async function getCurrentUserStories ({ activeStates, areaPath, referenceDate }) {
-    if (areaPath === undefined) {
-      throw new TypeError('The "storyOptions.areaPath" is not defined.')
+  async function getCurrentUserStories (team, referenceDate) {
+    if (team === undefined) {
+      throw new ReferenceError('"team" is not defined.')
     }
 
-    if (areaPath === '') {
-      throw new TypeError('The "storyOptions.areaPath" property must not be empty.')
+    if (team === '') {
+      throw new TypeError('"team" is empty.')
     }
 
-    if (referenceDate === undefined) {
-      throw new TypeError('The "storyOptions.referenceDate" property is not defined.')
-    }
-
-    if (Number.isNaN(referenceDate.valueOf())) {
-      throw new TypeError('The "storyOptions.referenceDate" property is not a valid date.')
-    }
-
-    const idsResult = await getCurrentStoryIds({ activeStates, areaPath, referenceDate })
+    const idsResult = await getCurrentStoryIds(team, referenceDate)
     const partialResult = { referenceDate: idsResult.referenceDate }
 
     if (idsResult.stories.length === 0) {
@@ -58,7 +48,17 @@ function createGetCurrentUserStoriesGetter (options) {
  * @typedef {import('../api/create-azure-devops-client').fetch} fetch
  * @typedef {import('./get-current-user-story-ids').UserStoryOptions} UserStoryOptions
  * @typedef {import('./get-current-user-story-ids').UserStoryReferencesResult} UserStoryReferencesResult
+ * @typedef {import('./get-current-user-story-ids').GetCurrentUserStoryIds} GetCurrentUserStoryIds
  * @typedef {import('./get-complete-user-stories').UserStory} UserStory
+ * @typedef {import('../teams/get-team-settings').TeamSettings} TeamSettings
+ * @typedef {import('../teams/get-team-settings').GetTeamSettings} GetTeamSettings
+ */
+
+/**
+ * @typedef {Object} GetCurrentUserStoriesOptions
+ * @property {GetTeamSettings} getTeamSettings
+ * @property {GetCurrentUserStoryIds} getCurrentUserStoryIds
+ * @property 
  */
 
 /**

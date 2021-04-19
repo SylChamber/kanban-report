@@ -66,7 +66,7 @@ function createCurrentUserStoryIdsGetter (options) {
 /**
  * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
  * @typedef {import('../teams/get-team-settings').TeamSettings} TeamSettings
- * @typedef {function(string):Promise<TeamSettings>} GetTeamSettings
+ * @typedef {import('../teams/get-team-settings').GetTeamSettings} GetTeamSettings
  */
 
 /**
@@ -95,6 +95,10 @@ function createCurrentUserStoryIdsGetter (options) {
  * @typedef {object} UserStoryReference
  * @property {number} id - ID of the user story.
  * @property {string} url - URL of the user story in the REST API.
+ */
+
+/**
+ * @typedef {function(string, string=):Promise<UserStoryReferencesResult>} GetCurrentUserStoryIds
  */
 
 module.exports = createCurrentUserStoryIdsGetter

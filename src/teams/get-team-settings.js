@@ -98,4 +98,8 @@ function createGetTeamSettingsGetter (options) {
  * @property {string[]} areas - area paths for the work items of the team.
  */
 
+/**
+ * @typedef {function(string):Promise<TeamSettings>} GetTeamSettings
+ */
+
 module.exports = createGetTeamSettingsGetter
