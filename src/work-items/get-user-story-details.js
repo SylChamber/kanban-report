@@ -59,8 +59,8 @@ function createUserStoryDetailsGetter (options) {
 }
 
 /**
- * Represents a user story in Azure DevOps.
- * @typedef {import('./map-to-user-story').UserStory[]} UserStory
+ * @typedef {import('./map-to-user-story').UserStory[]} UserStory Represents a user story in Azure DevOps.
+ * @typedef {function(number[]):Promise<UserStory[]>} GetUserStoryDetails Gets the details of user stories from Azure DevOps.
  */
 
 module.exports = createUserStoryDetailsGetter

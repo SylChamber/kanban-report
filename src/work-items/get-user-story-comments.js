@@ -40,6 +40,7 @@ function createUserStoryCommentsGetter (options) {
 
 /**
  * @typedef {import('./map-to-comment').Comment} Comment
+ * @typedef {function(number):Promise<Comment[]>} GetUserStoryComments Gets the comments for the specified user story from Azure DevOps.
  */
 
 module.exports = createUserStoryCommentsGetter
