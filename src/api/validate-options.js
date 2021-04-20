@@ -1,7 +1,7 @@
 /**
  * Validates the specified options for Azure DevOps REST API.
- * @param {AzureDevopsClientOptions} options - Options for the Azure DevOps REST API.
- * @returns {AzureDevopsClientOptions} The validated options and some defaults if not provided.
+ * @param {AzureDevOpsOptions} options - Options for the Azure DevOps REST API.
+ * @returns {AzureDevOpsOptions} The validated options and some defaults if not provided.
  */
 function validateOptions ({ organization, project, fetch, url }) {
   if (organization === undefined) {
@@ -36,7 +36,7 @@ function validateOptions ({ organization, project, fetch, url }) {
 }
 
 /**
- * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
+ * @typedef {import('../api/create-azure-devops-client').AzureDevOpsOptions} AzureDevOpsOptions
  */
 
 module.exports = validateOptions

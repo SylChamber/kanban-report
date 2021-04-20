@@ -5,6 +5,8 @@ const createGetUserStoryDetailsGetter = require('../work-items/get-user-story-de
 const createGetUserStoryCommentsGetter = require('../work-items/get-user-story-comments')
 const createGetCompleteUserStoriesGetter = require('../work-items/get-complete-user-stories')
 const createGetCurrentUserStoriesGetter = require('../work-items/get-current-user-stories')
+const decorateFetch = require('./decorate-fetch-with-options')
+const nodeFetch = require('node-fetch')
 const validateOptions = require('./validate-options')
 
 /**
@@ -12,8 +14,17 @@ const validateOptions = require('./validate-options')
    * @param {AzureDevopsClientOptions} options Options for getting an Azure DevOps REST API client.
    * @returns {AzureDevopsClient} Client for the Azure DevOps REST API.
    */
-function createAzureDevopsClient (options) {
-  options = validateOptions(options)
+function createAzureDevopsClient ({ accessToken, organization, project }) {
+  if (accessToken === undefined) {
+    throw new TypeError('The "accessToken" property is not defined.')
+  }
+
+  const options = validateOptions({
+    organization,
+    project,
+    url: arguments[0].url,
+    fetch: decorateFetch(nodeFetch, accessToken)
+  })
   const getTeamSettings = createGetTeamSettingsGetter(options)
   const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, getTeamSettings)
   const getUserStoryDetails = createGetUserStoryDetailsGetter(options)
@@ -43,12 +54,20 @@ function createAzureDevopsClient (options) {
  */
 
 /**
- * @typedef {object} AzureDevopsClientOptions Options for getting an Azure DevOps REST API client.
- * @property {string} organization - Organization that hosts the data in Azure DevOps.
- * @property {string} project - Project the team is part of.
- * @property {fetch} fetch - Interface that fetches resources from the network.
- * @property {string} [url] - The url for Azure DevOps; the Azure DevOps services URL will be used by default.
+ * @typedef {object} AzureDevOpsOptions Options for Azure DevOps REST API calls.
+ * @property {string} organization Organization that hosts the data in Azure DevOps.
+ * @property {string} project Project the team is part of.
+ * @property {fetch} fetch Interface that fetches resources from the network.
+ * @property {string} [url] The url for Azure DevOps; the Azure DevOps services URL will be used by default.
  */
+
+/**
+ * @typedef {object} AzureDevopsClientOptions Options for getting an Azure DevOps REST API client.
+ * @property {string} accessToken Personal access token for accessing Azure DevOps.
+ * @property {string} organization Organization that hosts the data in Azure DevOps.
+ * @property {string} project Project the team is part of.
+ * @property {string} [url] The url for Azure DevOps; the Azure DevOps services URL will be used by default.
+*/
 
 /**
  * Gets a client for the Azure DevOps REST API.

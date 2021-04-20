@@ -2,7 +2,7 @@ const validateOptions = require('../api/validate-options')
 
 /**
  * Creates a function that gets settings for a team.
- * @param {AzureDevopsClientOptions} options - Options for Azure DevOps REST API calls.
+ * @param {AzureDevOpsOptions} options - Options for Azure DevOps REST API calls.
  * @returns {getTeamSettings} A function that gets settings for a team.
  */
 function createGetTeamSettingsGetter (options) {
@@ -71,7 +71,7 @@ function createGetTeamSettingsGetter (options) {
 }
 
 /**
- * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
+ * @typedef {import('../api/create-azure-devops-client').AzureDevOpsOptions} AzureDevOpsOptions
  * @typedef {import('../api/create-azure-devops-client').fetch} fetch
  */
 

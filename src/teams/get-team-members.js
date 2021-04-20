@@ -7,7 +7,7 @@ const validateOptions = require('../api/validate-options')
 
 /**
  * Creates a function that gets the members for the specified team.
- * @param {AzdevClientOptions} options Options for getting an Azure DevOps REST API client.
+ * @param {AzureDevOpsOptions} options Options for Azure DevOps REST API calls.
  * @returns {getTeamMembers} Function that gets the members for the specified team.
  */
 function createTeamMembersGetter (options) {
@@ -42,7 +42,7 @@ function createTeamMembersGetter (options) {
 /**
  * @typedef {import('./map-to-person').Identity} Identity
  * @typedef {import('./map-to-person').Person} Person
- * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
+ * @typedef {import('../api/create-azure-devops-client').AzureDevOpsOptions} AzureDevOpsOptions
  * @typedef {import('../api/create-azure-devops-client').fetch} fetch
  * @typedef {import('node-fetch').RequestInfo} RequestInfo
  * @typedef {import('node-fetch').RequestInit} RequestInit

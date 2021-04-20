@@ -3,7 +3,7 @@ const validateOptions = require('../api/validate-options')
 
 /**
  * Creates a function that gets the comments for a user story from Azure DevOps.
- * @param {{organization:string, project: string, [url]:string}} options - Options for Azure DevOps.
+ * @param {AzureDevOpsOptions} options - Options for Azure DevOps.
  * @returns {getUserStoryComments} A function that gets comments for the specified user story.
  */
 function createUserStoryCommentsGetter (options) {
@@ -39,6 +39,7 @@ function createUserStoryCommentsGetter (options) {
 }
 
 /**
+ * @typedef {import('../api/create-azure-devops-client').AzureDevOpsOptions} AzureDevOpsOptions
  * @typedef {import('./map-to-comment').Comment} Comment
  * @typedef {function(number):Promise<Comment[]>} GetUserStoryComments Gets the comments for the specified user story from Azure DevOps.
  */

@@ -3,7 +3,7 @@ const mapToUserStory = require('./map-to-user-story')
 
 /**
  * Creates a function that gets user story details from Azure DevOps.
- * @param {{organization:string, project: string, [url]:string}} options - Options for Azure DevOps.
+ * @param {AzureDevOpsOptions} options - Options for Azure DevOps REST API calls.
  * @returns {getStoryDetails} A function that gets user story details for the specified ids.
  */
 function createUserStoryDetailsGetter (options) {
@@ -59,6 +59,7 @@ function createUserStoryDetailsGetter (options) {
 }
 
 /**
+ * @typedef {import('../api/create-azure-devops-client').AzureDevOpsOptions} AzureDevOpsOptions
  * @typedef {import('./map-to-user-story').UserStory[]} UserStory Represents a user story in Azure DevOps.
  * @typedef {function(number[]):Promise<UserStory[]>} GetUserStoryDetails Gets the details of user stories from Azure DevOps.
  */

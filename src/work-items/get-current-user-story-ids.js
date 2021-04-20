@@ -2,7 +2,7 @@ const validateOptions = require('../api/validate-options')
 
 /**
  * Creates a function that gets current user story Ids from Azure DevOps.
- * @param {AzureDevopsClientOptions} options Options for accessing Azure DevOps data.
+ * @param {AzureDevOpsOptions} options Options for accessing Azure DevOps data.
  * @param {GetTeamSettings} getTeamSettings Function that gets settings for a team.
  * @returns {getCurrentUserStoryIds} A function that gets the current user story ids at the date specified.
  */
@@ -63,7 +63,7 @@ function createCurrentUserStoryIdsGetter (options, getTeamSettings) {
 }
 
 /**
- * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
+ * @typedef {import('../api/create-azure-devops-client').AzureDevOpsOptions} AzureDevOpsOptions
  * @typedef {import('../teams/get-team-settings').TeamSettings} TeamSettings
  * @typedef {import('../teams/get-team-settings').GetTeamSettings} GetTeamSettings
  */
