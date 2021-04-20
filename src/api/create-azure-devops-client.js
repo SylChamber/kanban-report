@@ -1,4 +1,9 @@
-const createTeamMembersGetter = require('../teams/get-team-members')
+const createGetTeamSettingsGetter = require('../teams/get-team-settings')
+const createGetTeamMembersGetter = require('../teams/get-team-members')
+const createGetCurrentUserStoryIdsGetter = require('../work-items/get-current-user-story-ids')
+const createGetUserStoryDetailsGetter = require('../work-items/get-user-story-details')
+const createGetUserStoryCommentsGetter = require('../work-items/get-user-story-comments')
+const createGetCompleteUserStoriesGetter = require('../work-items/get-complete-user-stories')
 const createGetCurrentUserStoriesGetter = require('../work-items/get-current-user-stories')
 const validateOptions = require('./validate-options')
 
@@ -9,10 +14,15 @@ const validateOptions = require('./validate-options')
    */
 function createAzureDevopsClient (options) {
   options = validateOptions(options)
+  const getTeamSettings = createGetTeamSettingsGetter(options)
+  const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, getTeamSettings)
+  const getUserStoryDetails = createGetUserStoryDetailsGetter(options)
+  const getUserStoryComments = createGetUserStoryCommentsGetter(options)
+  const getCompleteUserStories = createGetCompleteUserStoriesGetter(getUserStoryDetails, getUserStoryComments)
 
   return {
-    getTeamMembers: createTeamMembersGetter(options),
-    getCurrentUserStories: createGetCurrentUserStoriesGetter(options)
+    getTeamMembers: createGetTeamMembersGetter(options),
+    getCurrentUserStories: createGetCurrentUserStoriesGetter(getCurrentUserStoryIds, getCompleteUserStories)
   }
 }
 
@@ -20,9 +30,11 @@ function createAzureDevopsClient (options) {
  * @typedef {import('node-fetch').RequestInfo} RequestInfo
  * @typedef {import('node-fetch').RequestInit} RequestInit
  * @typedef {import('node-fetch').Response} Response
+ * @typedef {import('../teams/get-team-members').GetTeamMembers} GetTeamMembers
  * @typedef {import('../work-items/get-current-user-story-ids').UserStoryOptions} UserStoryOptions
  * @typedef {import('../work-items/get-current-user-story-ids').UserStoryReference} UserStoryReference
  * @typedef {import('../work-items/map-to-user-story').UserStory} UserStory
+ * @typedef {import('../work-items/get-current-user-stories').GetCurrentUserStories} GetCurrentUserStories
  */
 
 /**
@@ -45,7 +57,8 @@ function createAzureDevopsClient (options) {
 
 /**
  * @typedef {object} AzureDevopsClient Client for the Azure DevOps REST API.
- * @property {function(string): Promise<Person[]>} getTeamMembers Gets the members for the specified team.
+ * @property {GetTeamMembers} getTeamMembers Gets the members for the specified team.
+ * @property {GetCurrentUserStories} getCurrentUserStories Gets the current user stories for the specified team at the specified date.
  */
 
 module.exports = createAzureDevopsClient

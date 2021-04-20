@@ -62,4 +62,8 @@ function createTeamMembersGetter (options) {
  * @property {number} count - Count of team members.
  */
 
+/**
+ * @typedef {function(string):Promise<Person[]>} GetTeamMembers
+ */
+
 module.exports = createTeamMembersGetter

@@ -4,26 +4,33 @@ const fetchDecorator = require('../api/decorate-fetch-with-options')
 
 describe('createCurrentGetUserStoryIdsGetter', () => {
   [
-    ['options (undefined)', undefined, new ReferenceError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
-    ['organization (undefined)', { project: 'proj' }, new TypeError('The "organization" property is not defined.')],
-    ['organization (empty)', { organization: '', project: 'proj' }, new TypeError('The "organization" property is empty.')],
-    ['project (undefined)', { organization: 'org' }, new TypeError('The "project" property is not defined.')],
-    ['project (empty)', { organization: 'org', project: '' }, new TypeError('The "project" property is empty.')],
-    ['fetch (undefined)', { organization: 'org', project: 'proj' }, new TypeError('The "fetch" property is not defined.')],
-    ['fetch (not a function)', { organization: 'org', project: 'proj', fetch: {} }, new TypeError('The "fetch" property is not a function.')],
-    ['url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')],
-    ['getTeamSettings (undefined)', { organization: 'org', project: 'proj', fetch: jest.fn() }, new TypeError('The "getTeamSettings" property is not defined.')],
-    ['getTeamSettings (not a function)', { organization: 'org', project: 'proj', fetch: jest.fn(), getTeamSettings: {} }, new TypeError('The "getTeamSettings" property is not a function.')]
+    ['(undefined)', undefined, new ReferenceError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
+    ['.organization (undefined)', { project: 'proj' }, new TypeError('The "organization" property is not defined.')],
+    ['.organization (empty)', { organization: '', project: 'proj' }, new TypeError('The "organization" property is empty.')],
+    ['.project (undefined)', { organization: 'org' }, new TypeError('The "project" property is not defined.')],
+    ['.project (empty)', { organization: 'org', project: '' }, new TypeError('The "project" property is empty.')],
+    ['.fetch (undefined)', { organization: 'org', project: 'proj' }, new TypeError('The "fetch" property is not defined.')],
+    ['.fetch (not a function)', { organization: 'org', project: 'proj', fetch: {} }, new TypeError('The "fetch" property is not a function.')],
+    ['.url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')]
   ].forEach(([testName, input, error]) => {
-    test(`requires ${testName}`, function requires () {
-      const fn = () => createGetCurrentUserStoryIdsGetter(input)
+    test(`requires options ${testName}`, function requires () {
+      const fn = () => createGetCurrentUserStoryIdsGetter(input, jest.fn().mockName('getTeamSettings'))
       expect(fn).toThrow(error)
     })
   })
 
+  test.each([
+    ['undefined', undefined, new TypeError('"getTeamSettings" is not defined.')],
+    ['not a function', {}, new TypeError('"getTeamSettings" is not a function.')]
+  ])('requires getTeamSettings (%s)', (testName, input, error) => {
+    const options = { organization: 'org', project: 'proj', fetch: jest.fn() }
+    const fn = () => createGetCurrentUserStoryIdsGetter(options, input)
+    expect(fn).toThrow(error)
+  })
+
   test('returns a function', () => {
-    const options = { organization: 'org', project: 'proj', fetch: jest.fn(), getTeamSettings: jest.fn() }
-    const fn = createGetCurrentUserStoryIdsGetter(options)
+    const options = { organization: 'org', project: 'proj', fetch: jest.fn() }
+    const fn = createGetCurrentUserStoryIdsGetter(options, jest.fn())
     expect(fn).toBeInstanceOf(Function)
   })
 })
@@ -34,22 +41,26 @@ describe('getCurrentUserStoryIds', () => {
   })
 
   function createOptions () {
-    const teamSettings = { areas: ['Team'], inProgressStates: ['Active'] }
     return {
       organization: 'org',
       project: 'proj',
       fetch: jest.fn(),
-      getTeamSettings: jest.fn().mockName('getTeamSettings')
-        .mockResolvedValue(teamSettings),
       url: 'https://devops'
     }
+  }
+
+  function createGetTeamSettingsMock () {
+    const teamSettings = { areas: ['Team'], inProgressStates: ['Active'] }
+    return jest.fn().mockName('getTeamSettings').mockResolvedValue(teamSettings)
   }
 
   test.each([
     ['team (undefined)', [undefined], new ReferenceError('"team" is not defined.')],
     ['team (empty)', [''], new TypeError('"team" is empty.')]
   ])('requires %s', async function requires (testName, input, error) {
-    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(createOptions())
+    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(
+      createOptions(),
+      createGetTeamSettingsMock())
     const fn = async () => await getCurrentUserStoryIds(...input)
     return expect(fn).rejects.toThrow(error)
   })
@@ -67,9 +78,9 @@ describe('getCurrentUserStoryIds', () => {
       const fetch = jest.fn().mockName('fetch').mockReturnValue(mockedResponse)
       const teamSettings = { areas: ['Area51'], inProgressStates: ['Active', 'Resolved'] }
       const getTeamSettings = jest.fn().mockName('getTeamSettings').mockResolvedValue(teamSettings)
-      const options = { ...createOptions(), fetch, getTeamSettings }
+      const options = { ...createOptions(), fetch }
       const expectedUrl = `${options.url}/${options.organization}/${options.project}/_apis/wit/wiql`
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, getTeamSettings)
       await getCurrentUserStoryIds(team, referenceDate)
       expect(fetch).toHaveBeenCalledWith(expectedUrl, expect.anything())
     })
@@ -90,7 +101,7 @@ describe('getCurrentUserStoryIds', () => {
       const fetch = jest.fn().mockName('fetch').mockReturnValue(mockedResponse)
       const teamSettings = { areas: ['Area51'], inProgressStates: ['Active', 'Resolved'] }
       const getTeamSettings = jest.fn().mockName('getTeamSettings').mockResolvedValue(teamSettings)
-      const options = { ...createOptions(), fetch, getTeamSettings }
+      const options = { ...createOptions(), fetch }
       const statesString = teamSettings.inProgressStates.map(s => `'${s}'`).join(', ')
       const areasString = teamSettings.areas.map(a => `'${a}'`).join(', ')
       const asOf = refDate
@@ -104,7 +115,7 @@ describe('getCurrentUserStoryIds', () => {
         },
         method: 'POST'
       }
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options)
+      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, getTeamSettings)
       await getCurrentUserStoryIds(team, refDate)
       expect(fetch).toHaveBeenCalledWith(expect.anything(), expectedOptions)
     })
@@ -128,9 +139,8 @@ describe('getCurrentUserStoryIds', () => {
       const getTeamSettings = jest.fn().mockName('getTeamSettings').mockResolvedValue(teamSettings)
       const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter({
         ...createOptions(),
-        fetch,
-        getTeamSettings
-      })
+        fetch
+      }, getTeamSettings)
       const result = await getCurrentUserStoryIds(team, referenceDate)
       expect(result).toHaveProperty('referenceDate')
       expect(result.referenceDate).toEqual(referenceDate)
@@ -149,9 +159,8 @@ describe('getCurrentUserStoryIds', () => {
       const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(
         {
           ...createOptions(),
-          fetch,
-          getTeamSettings
-        })
+          fetch
+        }, getTeamSettings)
       const result = await getCurrentUserStoryIds(team, referenceDate)
       expect(result).toHaveProperty('stories')
       expect(result.stories).toEqual(data.workItems)
@@ -160,19 +169,21 @@ describe('getCurrentUserStoryIds', () => {
 
   // eslint-disable-next-line jest/no-disabled-tests
   describe.skip('Azure integration', () => {
-    let options
-
-    beforeAll(() => {
-      options = {
+    function getOptions () {
+      return {
         organization: process.env.AZURE_DEVOPS_ORG,
         project: process.env.AZURE_DEVOPS_PROJECT,
-        fetch: fetchDecorator(nodeFetch, process.env.AZURE_DEVOPS_EXT_PAT),
-        getTeamSettings: require('../teams/get-team-settings')
+        fetch: fetchDecorator(nodeFetch, process.env.AZURE_DEVOPS_EXT_PAT)
       }
-    })
+    }
+
+    function getTeamSettings (options) {
+      return require('../teams/get-team-settings')(options)
+    }
 
     test('can access Azure DevOps', async () => {
-      const getStoryIds = createGetCurrentUserStoryIdsGetter(options)
+      const options = getOptions()
+      const getStoryIds = createGetCurrentUserStoryIdsGetter(options, getTeamSettings(options))
       const team = process.env.AZURE_DEVOPS_EXT_TEAM
       const referenceDate = new Date('2021-03-26T04:00:00Z')
       const result = await getStoryIds(team, referenceDate)

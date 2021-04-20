@@ -2,20 +2,19 @@ const validateOptions = require('../api/validate-options')
 
 /**
  * Creates a function that gets current user story Ids from Azure DevOps.
- * @param {AzureDevopsClientOptions & {getTeamSettings:GetTeamSettings}} options Options for accessing Azure DevOps data.
+ * @param {AzureDevopsClientOptions} options Options for accessing Azure DevOps data.
+ * @param {GetTeamSettings} getTeamSettings Function that gets settings for a team.
  * @returns {getCurrentUserStoryIds} A function that gets the current user story ids at the date specified.
  */
-function createCurrentUserStoryIdsGetter (options) {
+function createCurrentUserStoryIdsGetter (options, getTeamSettings) {
   const { organization, project, fetch, url } = validateOptions(options)
 
-  if (!Object.prototype.hasOwnProperty.call(options, 'getTeamSettings')) {
-    throw new TypeError('The "getTeamSettings" property is not defined.')
+  if (getTeamSettings === undefined) {
+    throw new TypeError('"getTeamSettings" is not defined.')
   }
 
-  const getTeamSettings = options.getTeamSettings
-
   if (typeof getTeamSettings !== 'function') {
-    throw new TypeError('The "getTeamSettings" property is not a function.')
+    throw new TypeError('"getTeamSettings" is not a function.')
   }
 
   return getCurrentUserStoryIds

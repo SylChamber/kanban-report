@@ -1,16 +1,25 @@
-const createUserStoryDetailsGetter = require('./get-user-story-details')
-const createUserStoryCommentsGetter = require('./get-user-story-comments')
-const validateOptions = require('../api/validate-options')
-
 /**
  * Creates a function that gets complete user stories for the specified ids.
- * @param {{organization:string, project: string, [url]:string}} options - Options for Azure DevOps.
+ * @param {GetUserStoryDetails} getUserStoryDetails Function that gets user story details for the specified ids.
+ * @param {GetUserStoryComments} getUserStoryComments Function that gets comments for a user story.
  * @returns {getCompleteUserStories} A function that gets complete user stories for the specified ids.
  */
-function createCompleteUserStoriesGetter (options) {
-  options = validateOptions(options)
-  const getUserStoryDetails = createUserStoryDetailsGetter(options)
-  const getUserStoryComments = createUserStoryCommentsGetter(options)
+function createCompleteUserStoriesGetter (getUserStoryDetails, getUserStoryComments) {
+  if (getUserStoryDetails === undefined) {
+    throw new TypeError('"getUserStoryDetails" is not defined.')
+  }
+
+  if (typeof getUserStoryDetails !== 'function') {
+    throw new TypeError('"getUserStoryDetails" is not a function.')
+  }
+
+  if (getUserStoryComments === undefined) {
+    throw new TypeError('"getUserStoryComments" is not defined.')
+  }
+
+  if (typeof getUserStoryComments !== 'function') {
+    throw new TypeError('"getUserStoryComments" is not a function.')
+  }
 
   return getCompleteUserStories
 
@@ -56,6 +65,9 @@ function createCompleteUserStoriesGetter (options) {
 /**
  * @typedef {import('./map-to-user-story').UserStory} UserStory
  * @typedef {import('./map-to-comment').Comment} Comment
+ * @typedef {import('./get-user-story-comments').GetUserStoryComments} GetUserStoryComments
+ * @typedef {import('./get-user-story-details').GetUserStoryDetails} GetUserStoryDetails
+ * @typedef {function(number[]):Promise<UserStory[]>} GetCompleteUserStories
  */
 
 module.exports = createCompleteUserStoriesGetter

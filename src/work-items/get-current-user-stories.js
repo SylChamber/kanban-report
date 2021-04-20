@@ -1,16 +1,25 @@
-const createGetCurrentStoryIdsGetter = require('./get-current-user-story-ids')
-const createGetCompleteUserStoriesGetter = require('./get-complete-user-stories')
-const validateOptions = require('../api/validate-options')
-
 /**
  * Creates a function that gets current user stories from Azure DevOps.
- * @param {AzureDevopsClientOptions & {getTeamSettings:GetTeamSettings}} options - Options for accessing Azure DevOps data.
+ * @param {GetCurrentUserStoryIds} getCurrentUserStoryIds Function that gets current user story ids.
+ * @param {GetCompleteUserStories} getCompleteUserStories Function that gets complete user stories for the specified ids.
  * @returns {getCurrentUserStories}
  */
-function createGetCurrentUserStoriesGetter (options) {
-  options = validateOptions(options)
-  const getCurrentStoryIds = createGetCurrentStoryIdsGetter(options)
-  const getCompleteUserStories = createGetCompleteUserStoriesGetter(options)
+function createGetCurrentUserStoriesGetter (getCurrentUserStoryIds, getCompleteUserStories) {
+  if (getCurrentUserStoryIds === undefined) {
+    throw new ReferenceError('"getCurrentUserStoryIds" is not defined.')
+  }
+
+  if (typeof getCurrentUserStoryIds !== 'function') {
+    throw new TypeError('"getCurrentUserStoryIds" is not a function.')
+  }
+
+  if (getCompleteUserStories === undefined) {
+    throw new ReferenceError('"getCompleteUserStories" is not defined.')
+  }
+
+  if (typeof getCompleteUserStories !== 'function') {
+    throw new TypeError('"getCompleteUserStories" is not a function.')
+  }
 
   return getCurrentUserStories
 
@@ -29,7 +38,7 @@ function createGetCurrentUserStoriesGetter (options) {
       throw new TypeError('"team" is empty.')
     }
 
-    const idsResult = await getCurrentStoryIds(team, referenceDate)
+    const idsResult = await getCurrentUserStoryIds(team, referenceDate)
     const partialResult = { referenceDate: idsResult.referenceDate }
 
     if (idsResult.stories.length === 0) {
@@ -44,21 +53,10 @@ function createGetCurrentUserStoriesGetter (options) {
 }
 
 /**
- * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
- * @typedef {import('../api/create-azure-devops-client').fetch} fetch
- * @typedef {import('./get-current-user-story-ids').UserStoryOptions} UserStoryOptions
  * @typedef {import('./get-current-user-story-ids').UserStoryReferencesResult} UserStoryReferencesResult
  * @typedef {import('./get-current-user-story-ids').GetCurrentUserStoryIds} GetCurrentUserStoryIds
  * @typedef {import('./get-complete-user-stories').UserStory} UserStory
- * @typedef {import('../teams/get-team-settings').TeamSettings} TeamSettings
- * @typedef {import('../teams/get-team-settings').GetTeamSettings} GetTeamSettings
- */
-
-/**
- * @typedef {Object} GetCurrentUserStoriesOptions
- * @property {GetTeamSettings} getTeamSettings
- * @property {GetCurrentUserStoryIds} getCurrentUserStoryIds
- * @property 
+ * @typedef {import('./get-complete-user-stories').GetCompleteUserStories} GetCompleteUserStories
  */
 
 /**
@@ -66,6 +64,10 @@ function createGetCurrentUserStoriesGetter (options) {
  * @typedef {object} UserStoriesResult
  * @property {Date} referenceDate - The reference date at which the user stories were current.
  * @property {UserStory[]} stories - The user stories returned by the query.
+ */
+
+/**
+ * @typedef {function(string, Date=):Promise<UserStoriesResult>} GetCurrentUserStories
  */
 
 module.exports = createGetCurrentUserStoriesGetter

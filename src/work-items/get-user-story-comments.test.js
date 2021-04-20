@@ -39,7 +39,7 @@ describe('getUserStoryComments', () => {
     return expect(fn).rejects.toThrow(error)
   })
 
-  test('returns results from the API', async () => {
+  test('maps results from the API', async () => {
     const mockReturn = Promise.resolve({
       json: () => Promise.resolve({
         totalCount: 1,
