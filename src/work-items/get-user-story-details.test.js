@@ -67,7 +67,6 @@ describe('getUserStoryDetails', () => {
       })
     })
     const expected = [{
-      acceptanceCriteria: undefined,
       areaPath: 'TheWay',
       board: { column: 'Todo', columnDone: false },
       createdBy: {

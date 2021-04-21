@@ -22,6 +22,7 @@ describe('mapToUserStory', function () {
     createdDate: 'System.CreatedDate',
     description: 'System.Description',
     firstActivatedDate: 'Custom.FirstActivatedDate',
+    parent: 'System.Parent',
     resolvedBy: 'Microsoft.VSTS.Common.ResolvedBy',
     resolvedDate: 'Microsoft.VSTS.Common.ResolvedDate',
     stackRank: 'Microsoft.VSTS.Common.StackRank',
@@ -214,6 +215,15 @@ describe('mapToUserStory', function () {
       expect(realStory.id).toEqual(workItem.id)
     })
 
+    test('parent', () => {
+      const workItem = createBasicWorkItem()
+      Object.assign(workItem.fields, {
+        [fieldKeys.parent]: 666
+      })
+      const realStory = mapToUserStory(workItem)
+      expect(realStory.parent).toEqual(workItem.fields[fieldKeys.parent])
+    })
+
     test('project', function () {
       const workItem = createBasicWorkItem()
       Object.assign(workItem.fields, {
@@ -291,58 +301,24 @@ describe('mapToUserStory', function () {
   })
 
   describe('ignores', () => {
-    test('activated by if undefined', function () {
+    test.each([
+      ['acceptance criteria', 'acceptanceCriteria'],
+      ['activated by', 'activatedBy'],
+      ['activated date', 'activatedDate'],
+      ['assigned to', 'assignedTo'],
+      ['board', 'board'],
+      ['changed by', 'changedBy'],
+      ['changed date', 'changedDate'],
+      ['closed by', 'closedBy'],
+      ['closed date', 'closedDate'],
+      ['description', 'description'],
+      ['first activated date', 'firstActivatedDate'],
+      ['parent', 'parent'],
+      ['tags', 'tags']
+    ])('%s if undefined', (testName, property) => {
       const workItem = createBasicWorkItem()
       const realStory = mapToUserStory(workItem)
-      expect(realStory).not.toHaveProperty('activatedBy')
-    })
-
-    test('activated date if undefined', function () {
-      const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
-      expect(realStory).not.toHaveProperty('activatedDate')
-    })
-
-    test('assigned to if undefined', function () {
-      const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
-      expect(realStory).not.toHaveProperty('assignedTo')
-    })
-
-    test('changed by if undefined', () => {
-      const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
-      expect(realStory).not.toHaveProperty('changedBy')
-    })
-
-    test('changed date if undefined', function () {
-      const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
-      expect(realStory).not.toHaveProperty('changedDate')
-    })
-
-    test('closed by if undefined', function () {
-      const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
-      expect(realStory).not.toHaveProperty('closedBy')
-    })
-
-    test('closed date if undefined', function () {
-      const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
-      expect(realStory).not.toHaveProperty('closedDate')
-    })
-
-    test('first activated date if undefined', function () {
-      const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
-      expect(realStory).not.toHaveProperty('firstActivatedDate')
-    })
-
-    test('ignore tags if undefined', function () {
-      const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
-      expect(realStory).not.toHaveProperty('tags')
+      expect(realStory).not.toHaveProperty(property)
     })
   })
 
