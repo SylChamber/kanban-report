@@ -1,10 +1,10 @@
-const mapToUserStory = require('./map-to-user-story')
+const mapToWorkItem = require('./map-to-work-item')
 
 /**
  * @typedef {import('../teams/map-to-person').Person} Person
  */
 
-describe('mapToUserStory', function () {
+describe('mapToWorkItem', function () {
   const fieldKeys = {
     acceptanceCriteria: 'Microsoft.VSTS.Common.AcceptanceCriteria',
     activatedBy: 'Microsoft.VSTS.Common.ActivatedBy',
@@ -41,7 +41,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.acceptanceCriteria]: 'some acceptance criteria'
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.acceptanceCriteria).toEqual(workItem.fields[fieldKeys.acceptanceCriteria])
     })
 
@@ -57,7 +57,7 @@ describe('mapToUserStory', function () {
           uniqueName: expectedActivatedBy.email
         }
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.activatedBy).toEqual(expectedActivatedBy)
     })
 
@@ -68,13 +68,13 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.activatedDate]: activatedDate
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.activatedDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
     test('area path', function () {
       const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.areaPath).toEqual(workItem.fields[fieldKeys.areaPath])
     })
 
@@ -90,7 +90,7 @@ describe('mapToUserStory', function () {
           uniqueName: expectedAssignedTo.email
         }
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.assignedTo).toEqual(expectedAssignedTo)
     })
 
@@ -98,7 +98,7 @@ describe('mapToUserStory', function () {
       test(`board with ${board.name}`, function () {
         const workItem = createBasicWorkItem()
         Object.assign(workItem.fields, board.data)
-        const realStory = mapToUserStory(workItem)
+        const realStory = mapToWorkItem(workItem)
         expect(realStory.board).toEqual(board.expected)
       })
     })
@@ -119,7 +119,7 @@ describe('mapToUserStory', function () {
           }
         }
       }
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.changedBy).toEqual(expectedChangedBy)
     })
 
@@ -130,7 +130,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.changedDate]: changedDate
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.changedDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
@@ -146,7 +146,7 @@ describe('mapToUserStory', function () {
           uniqueName: expectedClosedBy.email
         }
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.closedBy).toEqual(expectedClosedBy)
     })
 
@@ -157,7 +157,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.closedDate]: closedDate
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.closedDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
@@ -174,7 +174,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.createdBy]: createdBy
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.createdBy).toEqual(expectedCreatedBy)
     })
 
@@ -185,7 +185,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.createdDate]: createdDate
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.createdDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
@@ -194,7 +194,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.description]: 'some description'
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.description).toEqual(workItem.fields[fieldKeys.description])
     })
 
@@ -205,13 +205,13 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.firstActivatedDate]: firstActivatedDate
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.firstActivatedDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
     test('id', function () {
       const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.id).toEqual(workItem.id)
     })
 
@@ -220,7 +220,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.parent]: 666
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.parent).toEqual(workItem.fields[fieldKeys.parent])
     })
 
@@ -229,7 +229,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.teamProject]: 'Project'
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.project).toEqual(workItem.fields[fieldKeys.teamProject])
     })
 
@@ -238,7 +238,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem, {
         rev: 42
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.revision).toEqual(workItem.rev)
     })
 
@@ -247,7 +247,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.state]: 'Active'
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.state).toEqual(workItem.fields[fieldKeys.state])
     })
 
@@ -256,7 +256,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.stateReason]: 'Implementation started'
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.stateReason).toEqual(workItem.fields[fieldKeys.stateReason])
     })
 
@@ -267,7 +267,7 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.stateChangeDate]: stateChangeDate
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.stateChangeDate.valueOf()).toEqual(expectedDate.valueOf())
     })
 
@@ -277,25 +277,25 @@ describe('mapToUserStory', function () {
       Object.assign(workItem.fields, {
         [fieldKeys.tags]: expectedTags.join(' ;')
       })
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.tags).toEqual(expectedTags)
     })
 
     test('title', function () {
       const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.title).toEqual(workItem.fields[fieldKeys.title])
     })
 
     test('url', () => {
       const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.url).toEqual(workItem.url)
     })
 
     test('work item type', function () {
       const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory.workItemType).toEqual(workItem.fields[fieldKeys.workItemType])
     })
   })
@@ -317,7 +317,7 @@ describe('mapToUserStory', function () {
       ['tags', 'tags']
     ])('%s if undefined', (testName, property) => {
       const workItem = createBasicWorkItem()
-      const realStory = mapToUserStory(workItem)
+      const realStory = mapToWorkItem(workItem)
       expect(realStory).not.toHaveProperty(property)
     })
   })

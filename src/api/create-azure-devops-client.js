@@ -1,9 +1,9 @@
 const createGetTeamSettingsGetter = require('../teams/get-team-settings')
 const createGetTeamMembersGetter = require('../teams/get-team-members')
 const createGetCurrentUserStoryIdsGetter = require('../work-items/get-current-user-story-ids')
-const createGetUserStoryDetailsGetter = require('../work-items/get-user-story-details')
-const createGetUserStoryCommentsGetter = require('../work-items/get-user-story-comments')
-const createGetCompleteUserStoriesGetter = require('../work-items/get-complete-user-stories')
+const createGetWorkItemDetailsGetter = require('../work-items/get-work-item-details')
+const createGetWorkItemCommentsGetter = require('../work-items/get-work-item-comments')
+const createGetCompleteWorkItemsGetter = require('../work-items/get-complete-work-items')
 const createGetCurrentUserStoriesGetter = require('../work-items/get-current-user-stories')
 const decorateFetch = require('./decorate-fetch-with-options')
 const nodeFetch = require('node-fetch')
@@ -27,13 +27,13 @@ function createAzureDevopsClient ({ accessToken, organization, project }) {
   })
   const getTeamSettings = createGetTeamSettingsGetter(options)
   const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, getTeamSettings)
-  const getUserStoryDetails = createGetUserStoryDetailsGetter(options)
-  const getUserStoryComments = createGetUserStoryCommentsGetter(options)
-  const getCompleteUserStories = createGetCompleteUserStoriesGetter(getUserStoryDetails, getUserStoryComments)
+  const getWorkItemDetails = createGetWorkItemDetailsGetter(options)
+  const getWorkItemComments = createGetWorkItemCommentsGetter(options)
+  const getCompleteWorkItems = createGetCompleteWorkItemsGetter(getWorkItemDetails, getWorkItemComments)
 
   return {
     getTeamMembers: createGetTeamMembersGetter(options),
-    getCurrentUserStories: createGetCurrentUserStoriesGetter(getCurrentUserStoryIds, getCompleteUserStories)
+    getCurrentUserStories: createGetCurrentUserStoriesGetter(getCurrentUserStoryIds, getCompleteWorkItems)
   }
 }
 
@@ -42,9 +42,8 @@ function createAzureDevopsClient ({ accessToken, organization, project }) {
  * @typedef {import('node-fetch').RequestInit} RequestInit
  * @typedef {import('node-fetch').Response} Response
  * @typedef {import('../teams/get-team-members').GetTeamMembers} GetTeamMembers
- * @typedef {import('../work-items/get-current-user-story-ids').UserStoryOptions} UserStoryOptions
  * @typedef {import('../work-items/get-current-user-story-ids').UserStoryReference} UserStoryReference
- * @typedef {import('../work-items/map-to-user-story').UserStory} UserStory
+ * @typedef {import('../work-items/map-to-work-item').WorkItem} WorkItem
  * @typedef {import('../work-items/get-current-user-stories').GetCurrentUserStories} GetCurrentUserStories
  */
 

@@ -55,8 +55,8 @@ function createGetCurrentUserStoriesGetter (getCurrentUserStoryIds, getCompleteU
 /**
  * @typedef {import('./get-current-user-story-ids').UserStoryReferencesResult} UserStoryReferencesResult
  * @typedef {import('./get-current-user-story-ids').GetCurrentUserStoryIds} GetCurrentUserStoryIds
- * @typedef {import('./get-complete-user-stories').UserStory} UserStory
- * @typedef {import('./get-complete-user-stories').GetCompleteUserStories} GetCompleteUserStories
+ * @typedef {import('./get-complete-work-items').UserStory} UserStory
+ * @typedef {import('./get-complete-work-items').GetCompleteWorkItems} GetCompleteUserStories
  */
 
 /**

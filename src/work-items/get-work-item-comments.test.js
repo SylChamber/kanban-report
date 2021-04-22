@@ -1,6 +1,6 @@
-const createUserStoryCommentsGetter = require('./get-user-story-comments')
+const createWorkItemCommentsGetter = require('./get-work-item-comments')
 
-describe('createUserStoryCommentsGetter', () => {
+describe('createWorkItemCommentsGetter', () => {
   [
     ['options (undefined)', undefined, new ReferenceError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
     ['organization (undefined)', { project: 'proj' }, new TypeError('The "organization" property is not defined.')],
@@ -12,14 +12,14 @@ describe('createUserStoryCommentsGetter', () => {
     ['url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')]
   ].forEach(([testName, input, error]) => {
     test(`requires ${testName}`, () => {
-      const fn = () => createUserStoryCommentsGetter(input)
+      const fn = () => createWorkItemCommentsGetter(input)
       expect(fn).toThrow(error)
     })
   })
 
   test('returns a function', () => {
     const options = createOptions()
-    const fn = createUserStoryCommentsGetter(options)
+    const fn = createWorkItemCommentsGetter(options)
     expect(fn).toBeInstanceOf(Function)
   })
 })
@@ -28,14 +28,14 @@ function createOptions () {
   return { organization: 'org', project: 'proj', fetch: jest.fn().mockName('fetchStub'), url: 'https://devops' }
 }
 
-describe('getUserStoryComments', () => {
+describe('getWorkItemComments', () => {
   test.each([
     ['undefined', undefined, new ReferenceError('"id" is not defined')],
     ['string', '1', new TypeError('"id" is not an integer')],
     ['double', 1.5, new TypeError('"id" is not an integer')]
   ])('requires id (%s)', async function requiresId (testName, input, error) {
-    const getUserStoryComments = createUserStoryCommentsGetter(createOptions())
-    const fn = () => getUserStoryComments(input)
+    const getWorkItemComments = createWorkItemCommentsGetter(createOptions())
+    const fn = () => getWorkItemComments(input)
     return expect(fn).rejects.toThrow(error)
   })
 
@@ -73,8 +73,8 @@ describe('getUserStoryComments', () => {
       url: 'https://devops/workitems/5/comments/500'
     }
     const fetchMock = jest.fn().mockName('fetchMock').mockReturnValue(mockReturn)
-    const getUserStoryComments = createUserStoryCommentsGetter({ ...createOptions(), fetch: fetchMock })
-    const real = await getUserStoryComments(5)
+    const getWorkItemComments = createWorkItemCommentsGetter({ ...createOptions(), fetch: fetchMock })
+    const real = await getWorkItemComments(5)
     expect(real).toBeInstanceOf(Array)
     expect(real).toHaveLength(1)
     expect(real[0]).toEqual(expect.objectContaining(expected))

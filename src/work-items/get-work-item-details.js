@@ -1,22 +1,22 @@
 const validateOptions = require('../api/validate-options')
-const mapToUserStory = require('./map-to-user-story')
+const mapToWorkItem = require('./map-to-work-item')
 
 /**
- * Creates a function that gets user story details from Azure DevOps.
+ * Creates a function that gets work item details from Azure DevOps.
  * @param {AzureDevOpsOptions} options - Options for Azure DevOps REST API calls.
- * @returns {getStoryDetails} A function that gets user story details for the specified ids.
+ * @returns {getWorkItemDetails} A function that gets work item details for the specified ids.
  */
-function createUserStoryDetailsGetter (options) {
+function createWorkItemDetailsGetter (options) {
   const { organization, project, url, fetch } = validateOptions(options)
 
-  return getStoryDetails
+  return getWorkItemDetails
 
   /**
    * Gets the details of user stories from Azure DevOps.
    * @param {number[]} ids - Ids of user stories to get details for.
-   * @returns {Promise<UserStory[]>} A promise that resolves in an array of user stories.
+   * @returns {Promise<WorkItem[]>} A promise that resolves in an array of user stories.
    */
-  async function getStoryDetails (ids) {
+  async function getWorkItemDetails (ids) {
     if (ids === undefined) {
       throw new ReferenceError('"ids" is not defined')
     }
@@ -54,14 +54,14 @@ function createUserStoryDetailsGetter (options) {
      * @type {{count:number, value:{id:number, fields:object, url:string}[]}}
      */
     const result = await response.json()
-    return result.value.map(mapToUserStory)
+    return result.value.map(mapToWorkItem)
   }
 }
 
 /**
  * @typedef {import('../api/create-azure-devops-client').AzureDevOpsOptions} AzureDevOpsOptions
- * @typedef {import('./map-to-user-story').UserStory[]} UserStory Represents a user story in Azure DevOps.
- * @typedef {function(number[]):Promise<UserStory[]>} GetUserStoryDetails Gets the details of user stories from Azure DevOps.
+ * @typedef {import('./map-to-work-item').WorkItem} WorkItem Represents a work item in Azure DevOps.
+ * @typedef {function(number[]):Promise<WorkItem[]>} GetWorkItemDetails Gets the details of work items from Azure DevOps.
  */
 
-module.exports = createUserStoryDetailsGetter
+module.exports = createWorkItemDetailsGetter

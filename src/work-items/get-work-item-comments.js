@@ -2,21 +2,21 @@ const mapToComment = require('./map-to-comment')
 const validateOptions = require('../api/validate-options')
 
 /**
- * Creates a function that gets the comments for a user story from Azure DevOps.
+ * Creates a function that gets the comments for a work item from Azure DevOps.
  * @param {AzureDevOpsOptions} options - Options for Azure DevOps.
- * @returns {getUserStoryComments} A function that gets comments for the specified user story.
+ * @returns {getWorkItemComments} A function that gets comments for the specified work item.
  */
-function createUserStoryCommentsGetter (options) {
+function createWorkItemCommentsGetter (options) {
   const { organization, project, url, fetch } = validateOptions(options)
 
-  return getUserStoryComments
+  return getWorkItemComments
 
   /**
-   * Gets the comments for the specified user story from Azure DevOps.
-   * @param {number} id - The id of the user story for which the comments are required.
-   * @returns {Promise<Comment[]>} A promise that resolves in an array of comments for the user story.
+   * Gets the comments for the specified work item from Azure DevOps.
+   * @param {number} id - The id of the work item for which the comments are required.
+   * @returns {Promise<Comment[]>} A promise that resolves in an array of comments for the work item.
   */
-  async function getUserStoryComments (id) {
+  async function getWorkItemComments (id) {
     if (id === undefined) {
       throw new ReferenceError('"id" is not defined')
     }
@@ -41,7 +41,7 @@ function createUserStoryCommentsGetter (options) {
 /**
  * @typedef {import('../api/create-azure-devops-client').AzureDevOpsOptions} AzureDevOpsOptions
  * @typedef {import('./map-to-comment').Comment} Comment
- * @typedef {function(number):Promise<Comment[]>} GetUserStoryComments Gets the comments for the specified user story from Azure DevOps.
+ * @typedef {function(number):Promise<Comment[]>} GetWorkItemComments Gets the comments for the specified work item from Azure DevOps.
  */
 
-module.exports = createUserStoryCommentsGetter
+module.exports = createWorkItemCommentsGetter
