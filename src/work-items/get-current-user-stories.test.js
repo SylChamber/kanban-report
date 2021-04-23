@@ -2,12 +2,12 @@ const createGetCurrentUserStoriesGetter = require('./get-current-user-stories')
 
 describe('createGetCurrentUserStoriesGetter', () => {
   test.each([
-    ['getCurrentUserStoryIds (undefined)', [undefined, jest.fn()], new ReferenceError('"getCurrentUserStoryIds" is not defined.')],
-    ['getCurrentUserStoryIds (not a function)', [{}, jest.fn()], new TypeError('"getCurrentUserStoryIds" is not a function.')],
-    ['getCompleteUserStories (undefined)', [jest.fn(), undefined], new ReferenceError('"getCompleteUserStories" is not defined.')],
-    ['getCompleteUserStories (not a function)', [jest.fn(), {}], new TypeError('"getCompleteUserStories" is not a function.')]
-  ])('requires %s', (testName, [getCurrentUserStoryIds, getCompleteUserStories], error) => {
-    const fn = () => createGetCurrentUserStoriesGetter(getCurrentUserStoryIds, getCompleteUserStories)
+    ['getCurrentWorkItemIds (undefined)', [undefined, jest.fn()], new ReferenceError('"getCurrentWorkItemIds" is not defined.')],
+    ['getCurrentWorkItemIds (not a function)', [{}, jest.fn()], new TypeError('"getCurrentWorkItemIds" is not a function.')],
+    ['getCompleteWorkItems (undefined)', [jest.fn(), undefined], new ReferenceError('"getCompleteWorkItems" is not defined.')],
+    ['getCompleteWorkItems (not a function)', [jest.fn(), {}], new TypeError('"getCompleteWorkItems" is not a function.')]
+  ])('requires %s', (testName, [getCurrentWorkItemIds, getCompleteWorkItems], error) => {
+    const fn = () => createGetCurrentUserStoriesGetter(getCurrentWorkItemIds, getCompleteWorkItems)
     expect(fn).toThrow(error)
   })
 
@@ -35,9 +35,9 @@ describe('getCurrentUserStories', () => {
     test('reference date', async () => {
       const team = 'Area51'
       const referenceDate = new Date('2020-02-20T20:20:20Z')
-      const idsData = { referenceDate: referenceDate, stories: [] }
-      const getCurrentUserStoryIds = jest.fn().mockName('getCurrentUserStoryIds').mockResolvedValue(idsData)
-      const getStories = createGetCurrentUserStoriesGetter(getCurrentUserStoryIds, jest.fn())
+      const idsData = { referenceDate: referenceDate, items: [] }
+      const getCurrentWorkItemIds = jest.fn().mockName('getCurrentWorkItemIds').mockResolvedValue(idsData)
+      const getStories = createGetCurrentUserStoriesGetter(getCurrentWorkItemIds, jest.fn())
       const result = await getStories(team, referenceDate)
       expect(result).toHaveProperty('referenceDate')
       expect(result.referenceDate).toEqual(referenceDate)
@@ -48,9 +48,9 @@ describe('getCurrentUserStories', () => {
       const referenceDate = new Date('2020-02-20T20:20:20Z')
       const idsData = {
         referenceDate: referenceDate.toISOString(),
-        stories: [{ id: 5, url: 'https://devops/org/proj/_apis/wit/workitems/5' }]
+        items: [{ id: 5, url: 'https://devops/org/proj/_apis/wit/workitems/5' }]
       }
-      const storiesData = [{
+      const itemsData = [{
         areaPath: 'TheWay',
         board: { column: 'Todo', columnDone: false },
         comments: [{
@@ -81,8 +81,8 @@ describe('getCurrentUserStories', () => {
         url: 'https://devops/workitems/5',
         workItemType: 'User Story'
       }]
-      const getCurrentUserStoryIds = jest.fn().mockName('getCurrentUserStories').mockResolvedValue(idsData)
-      const getCompleteUserStories = jest.fn().mockName('getCompleteUserStories').mockResolvedValue(storiesData)
+      const getCurrentWorkItemIds = jest.fn().mockName('getCurrentUserStories').mockResolvedValue(idsData)
+      const getCompleteWorkItems = jest.fn().mockName('getCompleteWorkItems').mockResolvedValue(itemsData)
       const expected = {
         referenceDate: referenceDate,
         stories: [{
@@ -117,7 +117,7 @@ describe('getCurrentUserStories', () => {
           workItemType: 'User Story'
         }]
       }
-      const getStories = createGetCurrentUserStoriesGetter(getCurrentUserStoryIds, getCompleteUserStories)
+      const getStories = createGetCurrentUserStoriesGetter(getCurrentWorkItemIds, getCompleteWorkItems)
       const result = await getStories(team, referenceDate)
       expect(result).toHaveProperty('stories')
       expect(result.stories).toBeInstanceOf(Array)

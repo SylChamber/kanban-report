@@ -1,24 +1,24 @@
 /**
  * Creates a function that gets current user stories from Azure DevOps.
- * @param {GetCurrentUserStoryIds} getCurrentUserStoryIds Function that gets current user story ids.
- * @param {GetCompleteUserStories} getCompleteUserStories Function that gets complete user stories for the specified ids.
+ * @param {GetCurrentWorkItemIds} getWorkItemStoryIds Function that gets current user story ids.
+ * @param {GetCompleteWorkItems} getCompleteWorkItems Function that gets complete user stories for the specified ids.
  * @returns {getCurrentUserStories}
  */
-function createGetCurrentUserStoriesGetter (getCurrentUserStoryIds, getCompleteUserStories) {
-  if (getCurrentUserStoryIds === undefined) {
-    throw new ReferenceError('"getCurrentUserStoryIds" is not defined.')
+function createGetCurrentUserStoriesGetter (getWorkItemStoryIds, getCompleteWorkItems) {
+  if (getWorkItemStoryIds === undefined) {
+    throw new ReferenceError('"getCurrentWorkItemIds" is not defined.')
   }
 
-  if (typeof getCurrentUserStoryIds !== 'function') {
-    throw new TypeError('"getCurrentUserStoryIds" is not a function.')
+  if (typeof getWorkItemStoryIds !== 'function') {
+    throw new TypeError('"getCurrentWorkItemIds" is not a function.')
   }
 
-  if (getCompleteUserStories === undefined) {
-    throw new ReferenceError('"getCompleteUserStories" is not defined.')
+  if (getCompleteWorkItems === undefined) {
+    throw new ReferenceError('"getCompleteWorkItems" is not defined.')
   }
 
-  if (typeof getCompleteUserStories !== 'function') {
-    throw new TypeError('"getCompleteUserStories" is not a function.')
+  if (typeof getCompleteWorkItems !== 'function') {
+    throw new TypeError('"getCompleteWorkItems" is not a function.')
   }
 
   return getCurrentUserStories
@@ -38,25 +38,25 @@ function createGetCurrentUserStoriesGetter (getCurrentUserStoryIds, getCompleteU
       throw new TypeError('"team" is empty.')
     }
 
-    const idsResult = await getCurrentUserStoryIds(team, referenceDate)
+    const idsResult = await getWorkItemStoryIds(team, referenceDate)
     const partialResult = { referenceDate: idsResult.referenceDate }
 
-    if (idsResult.stories.length === 0) {
+    if (idsResult.items.length === 0) {
       return { ...partialResult, stories: [] }
     }
 
-    const ids = idsResult.stories.map(s => s.id)
-    const stories = await getCompleteUserStories(ids)
+    const ids = idsResult.items.map(s => s.id)
+    const stories = await getCompleteWorkItems(ids)
 
     return { ...partialResult, stories }
   }
 }
 
 /**
- * @typedef {import('./get-current-user-story-ids').UserStoryReferencesResult} UserStoryReferencesResult
- * @typedef {import('./get-current-user-story-ids').GetCurrentUserStoryIds} GetCurrentUserStoryIds
- * @typedef {import('./get-complete-work-items').UserStory} UserStory
- * @typedef {import('./get-complete-work-items').GetCompleteWorkItems} GetCompleteUserStories
+ * @typedef {import('./get-current-work-item-ids').WorkItemReferencesResult} WorkItemReferencesResult
+ * @typedef {import('./get-current-work-item-ids').GetCurrentWorkItemIds} GetCurrentWorkItemIds
+ * @typedef {import('./get-complete-work-items').WorkItem} WorkItem
+ * @typedef {import('./get-complete-work-items').GetCompleteWorkItems} GetCompleteWorkItems
  */
 
 /**

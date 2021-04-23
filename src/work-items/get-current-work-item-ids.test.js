@@ -1,8 +1,8 @@
 const nodeFetch = require('node-fetch')
-const createGetCurrentUserStoryIdsGetter = require('./get-current-user-story-ids')
+const createGetCurrentWorkItemIdsGetter = require('./get-current-work-item-ids')
 const fetchDecorator = require('../api/decorate-fetch-with-options')
 
-describe('createCurrentGetUserStoryIdsGetter', () => {
+describe('createGetCurrentWorkItemIdsGetter', () => {
   [
     ['(undefined)', undefined, new ReferenceError("Cannot destructure property 'organization' of 'undefined' as it is undefined.")],
     ['.organization (undefined)', { project: 'proj' }, new TypeError('The "organization" property is not defined.')],
@@ -14,7 +14,7 @@ describe('createCurrentGetUserStoryIdsGetter', () => {
     ['.url (empty)', { organization: 'org', project: 'proj', fetch: jest.fn(), url: '' }, new TypeError('The "url" property is empty.')]
   ].forEach(([testName, input, error]) => {
     test(`requires options ${testName}`, function requires () {
-      const fn = () => createGetCurrentUserStoryIdsGetter(input, jest.fn().mockName('getTeamSettings'))
+      const fn = () => createGetCurrentWorkItemIdsGetter(input, jest.fn().mockName('getTeamSettings'))
       expect(fn).toThrow(error)
     })
   })
@@ -24,18 +24,18 @@ describe('createCurrentGetUserStoryIdsGetter', () => {
     ['not a function', {}, new TypeError('"getTeamSettings" is not a function.')]
   ])('requires getTeamSettings (%s)', (testName, input, error) => {
     const options = { organization: 'org', project: 'proj', fetch: jest.fn() }
-    const fn = () => createGetCurrentUserStoryIdsGetter(options, input)
+    const fn = () => createGetCurrentWorkItemIdsGetter(options, input)
     expect(fn).toThrow(error)
   })
 
   test('returns a function', () => {
     const options = { organization: 'org', project: 'proj', fetch: jest.fn() }
-    const fn = createGetCurrentUserStoryIdsGetter(options, jest.fn())
+    const fn = createGetCurrentWorkItemIdsGetter(options, jest.fn())
     expect(fn).toBeInstanceOf(Function)
   })
 })
 
-describe('getCurrentUserStoryIds', () => {
+describe('getCurrentWorkItemIds', () => {
   beforeAll(() => {
     jest.useFakeTimers('modern')
   })
@@ -58,10 +58,10 @@ describe('getCurrentUserStoryIds', () => {
     ['team (undefined)', [undefined], new ReferenceError('"team" is not defined.')],
     ['team (empty)', [''], new TypeError('"team" is empty.')]
   ])('requires %s', async function requires (testName, input, error) {
-    const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(
+    const getCurrentWorkItemIds = createGetCurrentWorkItemIdsGetter(
       createOptions(),
       createGetTeamSettingsMock())
-    const fn = async () => await getCurrentUserStoryIds(...input)
+    const fn = async () => await getCurrentWorkItemIds(...input)
     return expect(fn).rejects.toThrow(error)
   })
 
@@ -80,8 +80,8 @@ describe('getCurrentUserStoryIds', () => {
       const getTeamSettings = jest.fn().mockName('getTeamSettings').mockResolvedValue(teamSettings)
       const options = { ...createOptions(), fetch }
       const expectedUrl = `${options.url}/${options.organization}/${options.project}/_apis/wit/wiql`
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, getTeamSettings)
-      await getCurrentUserStoryIds(team, referenceDate)
+      const getCurrentWorkItemIds = createGetCurrentWorkItemIdsGetter(options, getTeamSettings)
+      await getCurrentWorkItemIds(team, referenceDate)
       expect(fetch).toHaveBeenCalledWith(expectedUrl, expect.anything())
     })
 
@@ -115,8 +115,8 @@ describe('getCurrentUserStoryIds', () => {
         },
         method: 'POST'
       }
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(options, getTeamSettings)
-      await getCurrentUserStoryIds(team, refDate)
+      const getCurrentWorkItemIds = createGetCurrentWorkItemIdsGetter(options, getTeamSettings)
+      await getCurrentWorkItemIds(team, refDate)
       expect(fetch).toHaveBeenCalledWith(expect.anything(), expectedOptions)
     })
   })
@@ -137,16 +137,16 @@ describe('getCurrentUserStoryIds', () => {
       const fetch = jest.fn().mockName('fetchMock').mockReturnValue(response)
       const teamSettings = { areas: [team], inProgressStates: ['Active'] }
       const getTeamSettings = jest.fn().mockName('getTeamSettings').mockResolvedValue(teamSettings)
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter({
+      const getCurrentWorkItemIds = createGetCurrentWorkItemIdsGetter({
         ...createOptions(),
         fetch
       }, getTeamSettings)
-      const result = await getCurrentUserStoryIds(team, referenceDate)
+      const result = await getCurrentWorkItemIds(team, referenceDate)
       expect(result).toHaveProperty('referenceDate')
       expect(result.referenceDate).toEqual(referenceDate)
     })
 
-    test('user story references', async () => {
+    test('work item references', async () => {
       const [team, referenceDate] = createStoryOptions()
       const data = {
         asOf: referenceDate.toISOString(),
@@ -156,14 +156,14 @@ describe('getCurrentUserStoryIds', () => {
       const fetch = jest.fn().mockName('fetchMock').mockReturnValue(response)
       const teamSettings = { areas: [team], inProgressStates: ['Active'] }
       const getTeamSettings = jest.fn().mockName('getTeamSettings').mockResolvedValue(teamSettings)
-      const getCurrentUserStoryIds = createGetCurrentUserStoryIdsGetter(
+      const getCurrentWorkItemIds = createGetCurrentWorkItemIdsGetter(
         {
           ...createOptions(),
           fetch
         }, getTeamSettings)
-      const result = await getCurrentUserStoryIds(team, referenceDate)
-      expect(result).toHaveProperty('stories')
-      expect(result.stories).toEqual(data.workItems)
+      const result = await getCurrentWorkItemIds(team, referenceDate)
+      expect(result).toHaveProperty('items')
+      expect(result.items).toEqual(data.workItems)
     })
   })
 
@@ -183,17 +183,11 @@ describe('getCurrentUserStoryIds', () => {
 
     test('can access Azure DevOps', async () => {
       const options = getOptions()
-      const getStoryIds = createGetCurrentUserStoryIdsGetter(options, getTeamSettings(options))
+      const getCurrentWorkItemIds = createGetCurrentWorkItemIdsGetter(options, getTeamSettings(options))
       const team = process.env.AZURE_DEVOPS_EXT_TEAM
       const referenceDate = new Date('2021-03-26T04:00:00Z')
-      const result = await getStoryIds(team, referenceDate)
+      const result = await getCurrentWorkItemIds(team, referenceDate)
       expect(result).not.toBeNull()
     })
   })
 })
-
-/**
- * @typedef {import('../api/create-azure-devops-client').AzureDevopsClientOptions} AzureDevopsClientOptions
- * @typedef {import('./get-current-user-story-ids').UserStoryOptions} UserStoryOptions
- * @typedef {import('./get-current-user-story-ids').UserStoriesResult} UserStoriesResult
- */

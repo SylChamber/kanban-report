@@ -1,6 +1,6 @@
 const createGetTeamSettingsGetter = require('../teams/get-team-settings')
 const createGetTeamMembersGetter = require('../teams/get-team-members')
-const createGetCurrentUserStoryIdsGetter = require('../work-items/get-current-user-story-ids')
+const createGetCurrentUserStoryIdsGetter = require('../work-items/get-current-work-item-ids')
 const createGetWorkItemDetailsGetter = require('../work-items/get-work-item-details')
 const createGetWorkItemCommentsGetter = require('../work-items/get-work-item-comments')
 const createGetCompleteWorkItemsGetter = require('../work-items/get-complete-work-items')
@@ -42,7 +42,7 @@ function createAzureDevopsClient ({ accessToken, organization, project }) {
  * @typedef {import('node-fetch').RequestInit} RequestInit
  * @typedef {import('node-fetch').Response} Response
  * @typedef {import('../teams/get-team-members').GetTeamMembers} GetTeamMembers
- * @typedef {import('../work-items/get-current-user-story-ids').UserStoryReference} UserStoryReference
+ * @typedef {import('../work-items/get-current-work-item-ids').WorkItemReference} UserStoryReference
  * @typedef {import('../work-items/map-to-work-item').WorkItem} WorkItem
  * @typedef {import('../work-items/get-current-user-stories').GetCurrentUserStories} GetCurrentUserStories
  */
