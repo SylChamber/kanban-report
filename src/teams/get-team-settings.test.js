@@ -46,6 +46,7 @@ describe('getTeamSettings', () => {
           states: {
             New: 'Proposed',
             Active: 'InProgress',
+            Review: 'InProgress',
             Closed: 'Completed'
           }
         },
@@ -61,7 +62,7 @@ describe('getTeamSettings', () => {
       ]
     }
     const teamFieldValues = { defaultValue: 'Project', values: [{ value: 'Project' }] }
-    const expected = { inProgressStates: ['Active', 'Resolved'] }
+    const expected = { inProgressStates: ['Active', 'Review', 'Resolved'] }
     const fetchMock = jest.fn().mockName('fetchMock')
       .mockResolvedValueOnce({ json: async () => backlogConfig })
       .mockResolvedValueOnce({ json: async () => teamFieldValues })
