@@ -1,5 +1,33 @@
 # Notes on Azure DevOps REST API
 
+## Authentication
+
+First [create a personal token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page#create-a-pat).
+
+Use `Basic` authentication with your email address as `username` and the personal access token as the password.
+
+Here is an example in PowerShell:
+
+```PowerShell
+$cred = Get-Credential # prompts for username (email address) and password (token)
+$headers = @{
+  Accept = 'application/json; api-version=6.0'
+  'Content-Type' = 'application/json'
+}
+$org = '<organisation name>'
+$proj = '<project name>'
+# PSCustomObject optional: for user friendlier display
+$req = [PSCustomObject]@{
+  includeDeleted = $false
+  includeLatestOnly = $true
+  types = @('User Story', 'Bug')
+}
+$url = "https://dev.azure.com/$org/$proj/_apis/wit/reporting/workitemrevisions"
+$firstRevisions = Invoke-RestMethod -Method Post -Body $req `
+  -Authentication Basic -Credential $cred `
+  -Uri $url -Headers $headers
+```
+
 ## Team Configuration
 
 ### Mapped States
@@ -191,3 +219,29 @@ Partial result:
   (...)
 }
 ```
+
+## Data Aggregation for Kanban Metrics
+
+In order to build Kanban metrics, we need data for closed items. First we get work item IDs to help us filter the data, using the [WIQL API](https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/wiql/query-by-wiql?view=azure-devops-rest-6.0):
+
+```text
+POST https://dev.azure.com/{organization}/{project}/{team}/_apis/wit/wiql?api-version=6.0
+
+{
+  "query": "Select Id from WorkItems where [Work Item Type] in ('Bug', 'User Story') and State = 'Closed' and [Area Path] under '<Area Path>' order by [Closed Date]"
+}
+```
+
+Then we need to get dates for each column change. The [Work Item Reporting Revisions API](https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/reporting-work-item-revisions?view=azure-devops-rest-6.0) will return every change to all work items in the project. Having already gotten the work item IDs from a WIQL query makes it easier: we only keep revisions for the selected IDs.
+
+```text
+POST POST https://dev.azure.com/{organization}/{project}/_apis/wit/reporting/workitemrevisions?api-version=6.0
+
+{
+  "includeDeleted": false,
+  "types": ['Bug', 'User Story']
+}
+```
+
+We use the `nextLink` property in the returned data to get the next batch, until the `isLastBatch` property is `true`.
+
