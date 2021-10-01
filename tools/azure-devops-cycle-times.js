@@ -81,36 +81,40 @@ let mapToTransition = r => {
     closedDate: r[1][lastRevIndex].closedDate
   }
 }
+let sortByClosedDate = (a, b) => a.closedDate < b.closedDate ?
+  -1 :
+  a.closedDate > b.closedDate ?
+    1 :
+    0
 
-
-let batchesRemain = true
-let counter = 1
-let continuationToken
-let mapRevisions = new Map()
-do {
-  console.log('Récupération du lot', counter)
-  let urlLot = `${urlRevisions}${continuationToken ? '?continuationToken=' + continuationToken : ''}`
-  let responseRevisions = await fetch(urlLot, {
-    method: 'POST',
-    body: JSON.stringify(reqRevisions),
-    headers
-  })
-  /**
-   * @type {RevisionsResponse}
-   */
-  let resultRevisions = await responseRevisions.json()
-  batchesRemain = !resultRevisions.isLastBatch
-  continuationToken = resultRevisions.continuationToken
-  if (resultRevisions.isLastBatch) {
-    console.log("C'était le dernier lot!")
-  }
-  counter++
-  resultRevisions.values.
-    filter(filterIds(ids)).
-    filter(filterRemoved).
-    map(mapToRevision).
-    reduce(groupById, mapRevisions)
-} while (batchesRemain)
+// let batchesRemain = true
+// let counter = 1
+// let continuationToken
+// let mapRevisions = new Map()
+// do {
+//   console.log('Récupération du lot', counter)
+//   let urlLot = `${urlRevisions}${continuationToken ? '?continuationToken=' + continuationToken : ''}`
+//   let responseRevisions = await fetch(urlLot, {
+//     method: 'POST',
+//     body: JSON.stringify(reqRevisions),
+//     headers
+//   })
+//   /**
+//    * @type {RevisionsResponse}
+//    */
+//   let resultRevisions = await responseRevisions.json()
+//   batchesRemain = !resultRevisions.isLastBatch
+//   continuationToken = resultRevisions.continuationToken
+//   if (resultRevisions.isLastBatch) {
+//     console.log("C'était le dernier lot!")
+//   }
+//   counter++
+//   resultRevisions.values.
+//     filter(filterIds(ids)).
+//     filter(filterRemoved).
+//     map(mapToRevision).
+//     reduce(groupById, mapRevisions)
+// } while (batchesRemain)
 
 let getRevisions = async function getRevisions(continuationToken) {
   let batchesRemain = true
@@ -151,7 +155,9 @@ let getRevisions = async function getRevisions(continuationToken) {
 let getTransitions = async function getTransitions(continuationToken) {
   const revisions = await getRevisions(continuationToken)
   return {
-    transitions: Array.from(revisions.revisions.entries()).map(mapToTransition),
+    transitions: Array.from(revisions.revisions.entries()).
+      map(mapToTransition).
+      sort(sortByClosedDate),
     continuationToken: revisions.continuationToken
   }
 }
