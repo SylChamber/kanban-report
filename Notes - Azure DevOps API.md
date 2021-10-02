@@ -232,7 +232,16 @@ POST https://dev.azure.com/{organization}/{project}/{team}/_apis/wit/wiql?api-ve
 }
 ```
 
-Then we need to get dates for each column change. The [Work Item Reporting Revisions API](https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/reporting-work-item-revisions?view=azure-devops-rest-6.0) will return every change to all work items in the project. Having already gotten the work item IDs from a WIQL query makes it easier: we only keep revisions for the selected IDs.
+Then we need to get dates for each column change. The [Work Item Reporting Revisions API](https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/reporting-work-item-revisions?view=azure-devops-rest-6.0) will return every change to all work items in the project, or only the latest revision. If each column on your board has a state, then the later if what you need (the latest revision for each work item), since Azure DevOps keeps the date for the main states:
+
+* New: *Created Date*
+* Active: *Activated Date*
+* Resolved: *Resolved Date*
+* Closed: *Closed Date*
+
+And having already gotten the work item IDs from a WIQL query makes it easier: we only keep revisions for the selected IDs.
+
+However, if you have columns subdivided in `doing` and `done`, then you need to retrieve every single revision to get the `done` change dates.
 
 ```text
 POST POST https://dev.azure.com/{organization}/{project}/_apis/wit/reporting/workitemrevisions?api-version=6.0
@@ -243,5 +252,4 @@ POST POST https://dev.azure.com/{organization}/{project}/_apis/wit/reporting/wor
 }
 ```
 
-We use the `nextLink` property in the returned data to get the next batch, until the `isLastBatch` property is `true`.
-
+We use the `nextLink` property in the returned data to get the next batch, until the `isLastBatch` property is `true`, filtering out the unwanted revisions by ID.
