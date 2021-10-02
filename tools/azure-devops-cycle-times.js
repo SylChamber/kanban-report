@@ -21,18 +21,18 @@ let resultClosed = await responseClosed.json()
 let ids = resultClosed.workItems.map(item => item.id)
 
 // obtenir les révisions
-const urlRevisions = `${urlApis}/wit/reporting/workitemrevisions`
-let reqRevisions = {
-  includeDeleted: false,
-  includeLatestOnly: false,
-  types: ['Bug', 'User Story']
-}
-let responseRevisions = await fetch(urlRevisions, {
-  method: 'POST',
-  body: JSON.stringify(reqRevisions),
-  headers
-})
-let resultRevisions = await responseRevisions.json()
+// const urlRevisions = `${urlApis}/wit/reporting/workitemrevisions`
+// let reqRevisions = {
+//   includeDeleted: false,
+//   includeLatestOnly: false,
+//   types: ['Bug', 'User Story']
+// }
+// let responseRevisions = await fetch(urlRevisions, {
+//   method: 'POST',
+//   body: JSON.stringify(reqRevisions),
+//   headers
+// })
+// let resultRevisions = await responseRevisions.json()
 
 let mapToRevision = v => {
   return {
@@ -161,6 +161,42 @@ let getTransitions = async function getTransitions(continuationToken) {
     continuationToken: revisions.continuationToken
   }
 }
+
+let mapToDates = t => {
+  return {
+  id: t.id,
+  title: t.title,
+  createdDate: new Date(t.createdDate),
+  activatedDate: new Date(t.activatedDate),
+  workDoneDate: t.workDoneDate ? new Date(t.workDoneDate) : undefined,
+  resolvedDate: t.resolvedDate ? new Date(t.resolvedDate) : undefined,
+  closedDate: new Date(t.closedDate)
+  }
+}
+
+let mapToCycleTimes = t => {
+  const toDay = ms => Math.floor(ms / 1000 / 60 / 60 / 24) + 1
+  return Object.assign({}, t, {
+    working: t.workDoneDate ?
+      toDay(t.workDoneDate - t.activatedDate) :
+      t.resolvedDate ?
+        toDay(t.resolvedDate - t.activatedDate) :
+        toDay(t.closedDate - t.activatedDate),
+    workDone: t.resolvedDate && t.workDoneDate ?
+      toDay(t.resolvedDate - t.workDoneDate) :
+      1,
+    approval: t.resolvedDate ?
+      toDay(t.closedDate - t.resolvedDate) :
+      1,
+    cycleTime: toDay(t.closedDate - t.activatedDate)
+  })
+}
+
+let sortByCycleTime = (a, b) => a.cycleTime < b.cycleTime ?
+  -1 :
+  a.cycleTime > b.cycleTime ?
+    1 :
+    0
 
 /**
  * @typedef {object} Revision
