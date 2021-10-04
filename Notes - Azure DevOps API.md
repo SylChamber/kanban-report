@@ -222,15 +222,17 @@ Partial result:
 
 ## Data Aggregation for Kanban Metrics
 
-In order to build Kanban metrics, we need data for closed items. First we get work item IDs to help us filter the data, using the [WIQL API](https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/wiql/query-by-wiql?view=azure-devops-rest-6.0):
+In order to build Kanban metrics, we need data for all items (only closed items for cycle time scatter plots, but all other items for cumulative flow diagrams). First we get work item IDs to help us filter the data, using the [WIQL API](https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/wiql/query-by-wiql?view=azure-devops-rest-6.0):
 
 ```text
 POST https://dev.azure.com/{organization}/{project}/{team}/_apis/wit/wiql?api-version=6.0
 
 {
-  "query": "Select Id from WorkItems where [Work Item Type] in ('Bug', 'User Story') and State = 'Closed' and [Area Path] under '<Area Path>' order by [Closed Date]"
+  "query": "Select Id from WorkItems where [Work Item Type] in ('Bug', 'User Story') and State <> 'Removed' and [Area Path] under '<Area Path>' order by [State], [Closed Date]"
 }
 ```
+
+> That's assuming we want data from only one team, which we filter for with the area path.
 
 Then we need to get dates for each column change. The [Work Item Reporting Revisions API](https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/reporting-work-item-revisions?view=azure-devops-rest-6.0) will return every change to all work items in the project, or only the latest revision. If each column on your board has a state, then the later if what you need (the latest revision for each work item), since Azure DevOps keeps the date for the main states:
 
