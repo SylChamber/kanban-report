@@ -8,9 +8,9 @@ let headers = {
   Authorization: 'Basic Omd0aG9qN3IyNXR2eWdiZ3RqNjUzbW1wN3U2M3FsbHR0cGZxd2xodXNhanY2aWd3NTdlZHE='
 }
 
-// obtenir les cartes fermées
+// obtenir les cartes
 const urlClosed = `${urlApis}/wit/wiql`
-let query = String.raw`Select Id from WorkItems where [Work Item Type] in ('Bug', 'User Story') and State = 'Closed' and [Area Path] under 'SQIN\Projet 1\Gestion du produit\Équipe Système' order by [Closed Date]`
+let query = String.raw`Select Id from WorkItems where [Work Item Type] in ('Bug', 'User Story') and State <> 'Removed' and [Area Path] under 'SQIN\Projet 1\Gestion du produit\Équipe Système' order by [State], [Closed Date]`
 let reqClosed = { query }
 let responseClosed = await fetch(urlClosed, {
   method: 'POST',
@@ -74,9 +74,13 @@ let mapToTransition = r => {
   return {
     id: r[0],
     title: r[1][lastRevIndex].title,
+    state: r[1][lastRevIndex].state,
+    areaPath: r[1][lastRevIndex].areaPath,
     createdDate: r[1][lastRevIndex].createdDate,
     activatedDate: r[1][lastRevIndex].activatedDate,
-    workDoneDate: r[1].some(filterWorkDone) ? r[1].filter(filterWorkDone)[0].changedDate : undefined,
+    workDoneDate: r[1].some(filterWorkDone) ?
+      r[1].filter(filterWorkDone)[0].changedDate :
+      undefined,
     resolvedDate: r[1][lastRevIndex].resolvedDate,
     closedDate: r[1][lastRevIndex].closedDate
   }
@@ -117,6 +121,13 @@ let sortByClosedDate = (a, b) => a.closedDate < b.closedDate ?
 // } while (batchesRemain)
 
 let getRevisions = async function getRevisions(continuationToken) {
+  const urlRevisions = `${urlApis}/wit/reporting/workitemrevisions`
+  let reqRevisions = {
+    includeDeleted: false,
+    includeLatestOnly: false,
+    types: ['Bug', 'User Story']
+  }
+  
   let batchesRemain = true
   let counter = 1
   let mapRevisions = new Map()
@@ -163,15 +174,13 @@ let getTransitions = async function getTransitions(continuationToken) {
 }
 
 let mapToDates = t => {
-  return {
-  id: t.id,
-  title: t.title,
-  createdDate: new Date(t.createdDate),
-  activatedDate: new Date(t.activatedDate),
-  workDoneDate: t.workDoneDate ? new Date(t.workDoneDate) : undefined,
-  resolvedDate: t.resolvedDate ? new Date(t.resolvedDate) : undefined,
-  closedDate: new Date(t.closedDate)
-  }
+  return Object.assign({}, t, {
+    createdDate: new Date(t.createdDate),
+    activatedDate: t.activatedDate ? new Date(t.activatedDate) : undefined,
+    workDoneDate: t.workDoneDate ? new Date(t.workDoneDate) : undefined,
+    resolvedDate: t.resolvedDate ? new Date(t.resolvedDate) : undefined,
+    closedDate: t.closedDate ? new Date(t.closedDate) : undefined
+  })
 }
 
 let mapToCycleTimes = t => {
@@ -197,6 +206,10 @@ let sortByCycleTime = (a, b) => a.cycleTime < b.cycleTime ?
   a.cycleTime > b.cycleTime ?
     1 :
     0
+
+// convertir les dates chaînes vers des dates JavaScript, puis calculer
+// les temps de cycle
+transitions.transitions.map(mapToDates).map(mapToCycleTimes)
 
 /**
  * @typedef {object} Revision
